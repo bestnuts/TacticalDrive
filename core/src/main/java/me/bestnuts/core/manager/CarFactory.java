@@ -30,6 +30,11 @@ public class CarFactory implements VehicleFactory {
     }
 
     @Override
+    public @NotNull String name() {
+        return "car";
+    }
+
+    @Override
     public @Nullable Vehicle generate(@NotNull VehicleFactorySender sender) {
         Optional<FileConfiguration> optional = configurationFactory.parameter(sender.name());
         if (optional.isPresent()) {

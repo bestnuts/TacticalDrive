@@ -1,6 +1,7 @@
 package me.bestnuts.core.repository;
 
 import lombok.Getter;
+import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.core.manager.CarBoneFactory;
 import me.bestnuts.core.manager.CarConfigurationFactory;
 import me.bestnuts.core.manager.CarFactory;
@@ -19,5 +20,6 @@ public final class CarRepository {
         CarBoneFactory boneFactory = new CarBoneFactory();
         CarConfigurationFactory configurationFactory = new CarConfigurationFactory(shared.getEntityFactory(), dir);
         carFactory = new CarFactory(shared.getEntityFactory(), boneFactory, configurationFactory);
+        VehicleFactoryHook.registerHooks(carFactory);
     }
 }
