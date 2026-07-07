@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class DriverManager implements me.bestnuts.api.manager.DriverManager {
+public final class DriverManager implements Manager<UUID, Driver> {
 
     private final Map<UUID, Driver> idMap = new HashMap<>();
 
     @Override
     public @NotNull Class<? extends Manager<?, ?>> type() {
-        return me.bestnuts.api.manager.DriverManager.class;
+        return DriverManager.class;
     }
 
     @Override
