@@ -16,8 +16,8 @@ public final class CarRepository {
 
     public CarRepository(SharedRepository shared, @NotNull File dir) {
         this.shared = shared;
-        CarConfigurationFactory configurationFactory = new CarConfigurationFactory(dir);
         CarBoneFactory boneFactory = new CarBoneFactory();
-        carFactory = new CarFactory(shared.getEntityFactory(), configurationFactory, boneFactory);
+        CarConfigurationFactory configurationFactory = new CarConfigurationFactory(shared.getEntityFactory(), dir);
+        carFactory = new CarFactory(shared.getEntityFactory(), boneFactory, configurationFactory);
     }
 }

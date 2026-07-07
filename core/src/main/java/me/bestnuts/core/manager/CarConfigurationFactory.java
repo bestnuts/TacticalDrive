@@ -1,5 +1,6 @@
 package me.bestnuts.core.manager;
 
+import me.bestnuts.api.manager.EntityFactory;
 import me.bestnuts.api.manager.VehicleConfigurationFactory;
 import me.bestnuts.api.model.vehicle.configuration.DefaultConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.FuelConfiguration;
@@ -18,7 +19,8 @@ public class CarConfigurationFactory extends VehicleConfigurationFactory {
 
     private final File dir;
 
-    public CarConfigurationFactory(@NotNull File file) {
+    public CarConfigurationFactory(@NotNull EntityFactory entityFactory, @NotNull File file) {
+        super(entityFactory);
         dir = new File(file, "vehicles");
         if (!dir.exists() || !dir.isDirectory()) dir.mkdir();
         register(DefaultConfiguration.class, SharedDefaultConfiguration::new)
@@ -28,19 +30,22 @@ public class CarConfigurationFactory extends VehicleConfigurationFactory {
     }
 
     @Override
-    public @NotNull Optional<FileConfiguration> parameter(String name) {
+    @NotNull
+    public Optional<FileConfiguration> parameter(String name) {
         File file = new File(dir, name.concat(".yml"));
         if (!file.exists()) return Optional.empty();
         return Optional.of(YamlConfiguration.loadConfiguration(file));
     }
 
     @Override
-    public @NotNull CarConfiguration generate(@NotNull FileConfiguration configuration) {
+    @NotNull
+    public CarConfiguration generate(@NotNull FileConfiguration configuration) {
         return new CarConfiguration(this, configuration);
     }
 
     @Override
-    public @Nullable CarConfiguration generate(String name) {
+    @Nullable
+    public CarConfiguration generate(String name) {
         Optional<FileConfiguration> optional = parameter(name);
         return optional.map(this::generate).orElse(null);
     }

@@ -8,6 +8,5 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public abstract class VehicleBone {
 
-    @NotNull
-    private final VehicleGroup group;
+    @NotNull private final VehicleGroup group;
 }

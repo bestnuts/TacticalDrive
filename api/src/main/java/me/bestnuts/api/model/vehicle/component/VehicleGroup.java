@@ -1,6 +1,7 @@
 package me.bestnuts.api.model.vehicle.component;
 
 import me.bestnuts.api.model.vehicle.configuration.BoneConfiguration;
+import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -13,13 +14,13 @@ public final class VehicleGroup {
     @NotNull private final List<VehicleBone> bones;
     @NotNull private final List<VehicleGroup> children = new ArrayList<>();
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @Nullable BoneConfiguration boneConfiguration) {
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         this.parent = parent;
-        this.bones = boneConfiguration != null ? boneConfiguration.create(this) : List.of();
+        this.bones = boneConfiguration.create(this, sender);
     }
 
-    public static VehicleGroup createRoot(@Nullable BoneConfiguration boneConfiguration) {
-        return new VehicleGroup(null, boneConfiguration);
+    public static VehicleGroup createRoot(@NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+        return new VehicleGroup(null, sender, boneConfiguration);
     }
 
     @Nullable
@@ -27,8 +28,8 @@ public final class VehicleGroup {
         return parent;
     }
 
-    public VehicleGroup addChild(@Nullable BoneConfiguration boneConfiguration) {
-        VehicleGroup child = new VehicleGroup(this, boneConfiguration);
+    public VehicleGroup addChild(@NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+        VehicleGroup child = new VehicleGroup(this, sender, boneConfiguration);
         this.children.add(child);
         return child;
     }

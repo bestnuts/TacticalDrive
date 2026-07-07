@@ -4,6 +4,7 @@ import me.bestnuts.api.manager.EntityFactory;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.VehicleGroup;
+import me.bestnuts.api.model.vehicle.configuration.GroupImplConfiguration;
 import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import me.bestnuts.api.model.vehicle.dto.VehicleFactorySender;
 import me.bestnuts.core.model.vehicle.VehicleCar;
@@ -19,13 +20,13 @@ import java.util.Optional;
 public class CarFactory implements VehicleFactory {
 
     private final EntityFactory entityFactory;
-    private final CarConfigurationFactory configurationFactory;
     private final CarBoneFactory boneFactory;
+    private final CarConfigurationFactory configurationFactory;
 
-    public CarFactory(EntityFactory entityFactory, CarConfigurationFactory configurationFactory, CarBoneFactory boneFactory) {
+    public CarFactory(EntityFactory entityFactory, CarBoneFactory boneFactory, CarConfigurationFactory configurationFactory) {
         this.entityFactory = entityFactory;
-        this.configurationFactory = configurationFactory;
         this.boneFactory = boneFactory;
+        this.configurationFactory = configurationFactory;
     }
 
     @Override
@@ -34,8 +35,11 @@ public class CarFactory implements VehicleFactory {
         if (optional.isPresent()) {
             FileConfiguration configuration = optional.get();
             CarConfiguration vehicleConfiguration = configurationFactory.generate(configuration);
-            VehicleGroup vehicleGroup = boneFactory.generate(vehicleConfiguration).create();
-            Entity entity = entityFactory.generate(new EntityFactorySender(sender.location(), configuration));
+            GroupImplConfiguration group = boneFactory.generate(vehicleConfiguration);
+            if (group == null) return null;
+            EntityFactorySender entityFactorySender = new EntityFactorySender(sender.location(), configuration);
+            VehicleGroup vehicleGroup = group.create(entityFactorySender);
+            Entity entity = entityFactory.generate(entityFactorySender);
             VehicleRoot root = new VehicleRoot(entity);
             return new VehicleCar(root, vehicleGroup, vehicleConfiguration);
         }

@@ -1,13 +1,17 @@
 package me.bestnuts.api.model.vehicle.configuration;
 
-import org.bukkit.configuration.ConfigurationSection;
+import lombok.Getter;
+import me.bestnuts.api.manager.EntityFactory;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 public abstract class BoneAbstractConfiguration implements BoneConfiguration {
 
+    private final EntityFactory entityFactory;
     private final VehicleConfiguration parent;
 
-    public BoneAbstractConfiguration(@NotNull VehicleConfiguration parent, @NotNull ConfigurationSection section) {
+    public BoneAbstractConfiguration(@NotNull EntityFactory entityFactory, @NotNull VehicleConfiguration parent) {
+        this.entityFactory = entityFactory;
         this.parent = parent;
     }
 

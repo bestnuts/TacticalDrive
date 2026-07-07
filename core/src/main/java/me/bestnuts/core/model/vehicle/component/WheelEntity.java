@@ -14,7 +14,7 @@ public class WheelEntity extends VehicleWheel implements VehicleEntity {
 
     private final Entity entity;
 
-    public WheelEntity(VehicleGroup group, Entity entity) {
+    public WheelEntity(@NotNull VehicleGroup group, @NotNull Entity entity) {
         super(group);
         this.entity = entity;
     }

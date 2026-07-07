@@ -1,5 +1,6 @@
 package me.bestnuts.api.manager;
 
+import lombok.Getter;
 import me.bestnuts.api.model.vehicle.configuration.SharedConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,6 +19,13 @@ public abstract class VehicleConfigurationFactory implements ConfigurationFactor
     }
 
     private final Map<Class<?>, ConfigCreator> function = new HashMap<>();
+
+    @Getter
+    private final EntityFactory entityFactory;
+
+    public VehicleConfigurationFactory(EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
+    }
 
     public abstract @Nullable VehicleConfiguration generate(String name);
 

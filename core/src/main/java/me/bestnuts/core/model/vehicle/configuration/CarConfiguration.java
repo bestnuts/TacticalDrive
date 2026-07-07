@@ -11,7 +11,7 @@ public class CarConfiguration extends VehicleConfiguration {
     private final CarConfigurationFactory factory;
 
     public CarConfiguration(@NotNull CarConfigurationFactory factory, @NotNull FileConfiguration configuration) {
-        super(factory, configuration);
+        super(factory, configuration, CarBoneConfiguration::new);
         this.factory = factory;
     }
 
