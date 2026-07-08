@@ -1,6 +1,7 @@
 package me.bestnuts.core.manager;
 
 import me.bestnuts.api.manager.EntityFactory;
+import me.bestnuts.api.manager.GroupFactory;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.VehicleGroup;
@@ -20,10 +21,10 @@ import java.util.Optional;
 public class CarFactory extends VehicleFactory {
 
     private final EntityFactory entityFactory;
-    private final CarGroupFactory groupFactory;
+    private final GroupFactory groupFactory;
     private final CarConfigurationFactory configurationFactory;
 
-    public CarFactory(EntityFactory entityFactory, CarGroupFactory groupFactory, CarConfigurationFactory configurationFactory) {
+    public CarFactory(EntityFactory entityFactory, GroupFactory groupFactory, CarConfigurationFactory configurationFactory) {
         this.entityFactory = entityFactory;
         this.groupFactory = groupFactory;
         this.configurationFactory = configurationFactory;
