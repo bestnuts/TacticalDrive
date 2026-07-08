@@ -20,12 +20,8 @@ public final class VehicleGroup {
         this.bones = sender == null ? List.of() : boneConfiguration.create(this, sender);
     }
 
-    public static VehicleGroup createRoot(@NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+    public static VehicleGroup createRoot(@Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         return new VehicleGroup(null, sender, boneConfiguration);
-    }
-
-    public static VehicleGroup createDummy(@Nullable VehicleGroup parent, @NotNull BoneConfiguration boneConfiguration) {
-        return new VehicleGroup(parent, null, boneConfiguration);
     }
 
     @Nullable

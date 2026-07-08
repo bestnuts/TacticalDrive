@@ -49,7 +49,7 @@ public final class GroupImplConfiguration implements GroupConfiguration {
     public @NotNull VehicleGroup create(@NotNull EntityFactorySender sender) {
         VehicleGroup rootGroup;
         if (section == null) {
-            rootGroup = VehicleGroup.createDummy(null, parent.getBone());
+            rootGroup = VehicleGroup.createRoot(null, parent.getBone());
         } else {
             rootGroup = VehicleGroup.createRoot(sender.withSection(section), parent.getBone());
         }
