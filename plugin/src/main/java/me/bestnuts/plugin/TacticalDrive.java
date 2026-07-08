@@ -24,23 +24,6 @@ public final class TacticalDrive extends JavaPlugin {
     private GlobalRepository repository;
     private VehicleService service;
 
-    private final CommandNode command =
-            Commands.command("vehicle")
-                    .child(
-                            Commands.command("spawn")
-                                    .argument(Arguments.string("type").suggests(VehicleFactoryHook.hookKeySet().toArray(new String[0])))
-                                    .argument(Arguments.string("name"))
-                                    .playerExecute(ctx -> {
-
-                                        String type = ctx.get("type");
-                                        String name = ctx.get("name");
-
-                                        VehicleFactory factory = VehicleFactoryHook.getHooks(type);
-                                        if (factory == null) return;
-                                        this.service.spawn(factory, new VehicleFactorySender(ctx.player().getLocation(), name));
-                                    })
-                    );
-
     @Override
     public void onEnable() {
         PluginProvider.initialize(this);
@@ -59,7 +42,25 @@ public final class TacticalDrive extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository), this);
         final LifecycleEventManager<@NotNull Plugin> lifecycleManager = this.getLifecycleManager();
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, (event) -> {
-            event.registrar().register(command.build().build(), "탈것 명령어", List.of("탈것", "xkfrjt"));
+            event.registrar().register(command().build().build(), "탈것 명령어", List.of("탈것", "xkfrjt"));
         });
+    }
+
+    private CommandNode command() {
+        return Commands.command("vehicle")
+                .child(
+                        Commands.command("spawn")
+                                .argument(Arguments.string("type").suggests(VehicleFactoryHook.hookKeySet().toArray(new String[0])))
+                                .argument(Arguments.string("name"))
+                                .playerExecute(ctx -> {
+
+                                    String type = ctx.get("type");
+                                    String name = ctx.get("name");
+
+                                    VehicleFactory factory = VehicleFactoryHook.getHooks(type);
+                                    if (factory == null) return;
+                                    this.service.spawn(factory, new VehicleFactorySender(ctx.player().getLocation(), name));
+                                })
+                );
     }
 }

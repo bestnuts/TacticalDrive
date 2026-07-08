@@ -14,13 +14,17 @@ public final class VehicleGroup {
     @NotNull private final List<VehicleBone> bones;
     @NotNull private final List<VehicleGroup> children = new ArrayList<>();
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+    public VehicleGroup(@Nullable VehicleGroup parent, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         this.parent = parent;
-        this.bones = boneConfiguration.create(this, sender);
+        this.bones = sender == null ? List.of() : boneConfiguration.create(this, sender);
     }
 
     public static VehicleGroup createRoot(@NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         return new VehicleGroup(null, sender, boneConfiguration);
+    }
+
+    public static VehicleGroup createDummy(@Nullable VehicleGroup parent, @NotNull BoneConfiguration boneConfiguration) {
+        return new VehicleGroup(parent, null, boneConfiguration);
     }
 
     @Nullable
@@ -28,7 +32,7 @@ public final class VehicleGroup {
         return parent;
     }
 
-    public VehicleGroup addChild(@NotNull EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+    public VehicleGroup addChild(@Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         VehicleGroup child = new VehicleGroup(this, sender, boneConfiguration);
         this.children.add(child);
         return child;

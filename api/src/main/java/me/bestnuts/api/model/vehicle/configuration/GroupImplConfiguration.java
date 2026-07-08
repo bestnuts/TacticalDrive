@@ -4,6 +4,7 @@ import me.bestnuts.api.model.vehicle.component.VehicleGroup;
 import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +16,18 @@ public final class GroupImplConfiguration implements GroupConfiguration {
 
     private final VehicleConfiguration parent;
     private final List<GroupConfiguration> children;
+    @Nullable
+    private final ConfigurationSection section;
 
     public GroupImplConfiguration(@NotNull VehicleConfiguration parent, @NotNull ConfigurationSection section) {
         this.parent = parent;
         this.children = new ArrayList<>();
+        this.section = section.getConfigurationSection("bones");
         for (String key : section.getKeys(false)) {
             if (bonesFilter.test(key)) continue;
             ConfigurationSection groupSection = section.getConfigurationSection(key);
             if (groupSection == null) continue;
-            addChild(new GroupImplConfiguration(parent, section));
+            addChild(new GroupImplConfiguration(parent, groupSection));
         }
     }
 
@@ -37,8 +41,18 @@ public final class GroupImplConfiguration implements GroupConfiguration {
     }
 
     @Override
+    public @Nullable ConfigurationSection section() {
+        return section;
+    }
+
+    @Override
     public @NotNull VehicleGroup create(@NotNull EntityFactorySender sender) {
-        VehicleGroup rootGroup = VehicleGroup.createRoot(sender, parent.getBone());
+        VehicleGroup rootGroup;
+        if (section == null) {
+            rootGroup = VehicleGroup.createDummy(null, parent.getBone());
+        } else {
+            rootGroup = VehicleGroup.createRoot(sender.withSection(section), parent.getBone());
+        }
 
         buildTree(rootGroup, this, sender);
         return rootGroup;
@@ -46,9 +60,10 @@ public final class GroupImplConfiguration implements GroupConfiguration {
 
     private void buildTree(@NotNull VehicleGroup parentGroup, @NotNull GroupConfiguration parentConfig, @NotNull EntityFactorySender sender) {
         for (GroupConfiguration childConfig : parentConfig.children()) {
-            VehicleGroup childGroup = parentGroup.addChild(sender, parent.getBone());
+            EntityFactorySender newSender = childConfig.section() == null ? null : sender.withSection(childConfig.section());
+            VehicleGroup childGroup = parentGroup.addChild(newSender, parent.getBone());
 
-            buildTree(childGroup, childConfig, sender);
+            buildTree(childGroup, childConfig, newSender);
         }
     }
 

@@ -1,9 +1,7 @@
 package me.bestnuts.api.model.vehicle.component;
 
-import lombok.Getter;
 import me.bestnuts.api.manager.BoneType;
 
-@Getter
 @BoneType("door")
 public abstract class VehicleDoor extends VehicleBone {
 

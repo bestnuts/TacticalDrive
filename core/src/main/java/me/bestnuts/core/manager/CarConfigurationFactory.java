@@ -21,8 +21,8 @@ public class CarConfigurationFactory extends VehicleConfigurationFactory {
 
     public CarConfigurationFactory(@NotNull EntityFactory entityFactory, @NotNull File file) {
         super(entityFactory);
-        dir = new File(file, "vehicles");
-        if (!dir.exists() || !dir.isDirectory()) dir.mkdir();
+        dir = new File(file, "vehicles/car");
+        if (!dir.exists() || !dir.isDirectory()) dir.mkdirs();
         register(DefaultConfiguration.class, SharedDefaultConfiguration::new)
                 .register(FuelConfiguration.class, SharedFuelConfiguration::new)
                 .register(HandleConfiguration.class, CarHandleConfiguration::new)

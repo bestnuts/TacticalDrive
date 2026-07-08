@@ -1,17 +1,19 @@
-package me.bestnuts.core.model.vehicle.component;
+package me.bestnuts.api.model.vehicle.component;
 
-import me.bestnuts.api.model.vehicle.component.VehicleEntity;
+import me.bestnuts.api.manager.BoneType;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public final class VehicleRoot implements VehicleEntity {
+@BoneType("model")
+public abstract class VehicleModel extends VehicleBone implements VehicleEntity {
 
     private final Entity entity;
 
-    public VehicleRoot(Entity entity) {
+    public VehicleModel(@NotNull VehicleGroup group, @NotNull Entity entity) {
+        super(group);
         this.entity = entity;
     }
 
@@ -32,6 +34,6 @@ public final class VehicleRoot implements VehicleEntity {
 
     @Override
     public boolean isValid() {
-        return true;
+        return entity.isValid();
     }
 }
