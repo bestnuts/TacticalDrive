@@ -6,10 +6,10 @@ import me.bestnuts.api.model.vehicle.dto.VehicleFactorySender;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-public interface VehicleFactory extends Factory<VehicleFactorySender, Vehicle> {
-    @NotNull String name();
+public abstract class VehicleFactory implements Factory<VehicleFactorySender, Vehicle> {
+    public abstract @NotNull String name();
 
-    default void applyDataKey(Vehicle vehicle) {
+    protected void applyDataKey(Vehicle vehicle) {
         String id = vehicle.entity().getUniqueId().toString();
         vehicle.group().consumerTransition(
                 group ->

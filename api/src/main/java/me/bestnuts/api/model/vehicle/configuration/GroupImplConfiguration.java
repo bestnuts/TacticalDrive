@@ -1,7 +1,5 @@
 package me.bestnuts.api.model.vehicle.configuration;
 
-import me.bestnuts.api.model.vehicle.component.VehicleGroup;
-import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,28 +48,6 @@ public final class GroupImplConfiguration implements GroupConfiguration {
     @Override
     public @Nullable ConfigurationSection boneSection() {
         return boneSection;
-    }
-
-    @Override
-    public @NotNull VehicleGroup create(@NotNull EntityFactorySender sender) {
-        VehicleGroup rootGroup;
-        if (boneSection == null) {
-            rootGroup = VehicleGroup.createRoot(groupName, null, parent.getBone());
-        } else {
-            rootGroup = VehicleGroup.createRoot(groupName, sender.withSection(boneSection), parent.getBone());
-        }
-
-        buildTree(rootGroup, this, sender);
-        return rootGroup;
-    }
-
-    private void buildTree(@NotNull VehicleGroup parentGroup, @NotNull GroupConfiguration parentConfig, @NotNull EntityFactorySender sender) {
-        for (GroupConfiguration childConfig : parentConfig.children()) {
-            EntityFactorySender newSender = childConfig.boneSection() == null ? null : sender.withSection(childConfig.boneSection());
-            VehicleGroup childGroup = parentGroup.addChild(childConfig.groupName(), newSender, parent.getBone());
-
-            buildTree(childGroup, childConfig, sender);
-        }
     }
 
     @Override

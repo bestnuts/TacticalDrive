@@ -1,6 +1,7 @@
 package me.bestnuts.api.model.vehicle.component;
 
-import me.bestnuts.api.model.vehicle.configuration.BoneConfiguration;
+import me.bestnuts.api.manager.BoneFactory;
+import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
 import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,10 +17,10 @@ public final class VehicleGroup {
     @NotNull private final List<VehicleBone> bones;
     @NotNull private final List<VehicleGroup> children = new ArrayList<>();
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
         this.parent = parent;
         this.name = name;
-        this.bones = sender == null ? List.of() : boneConfiguration.create(this, sender);
+        this.bones = sender == null ? List.of() : boneFactory.generate(new BoneFactorySender(this, sender));
     }
 
     public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<VehicleBone> bones) {
@@ -28,12 +29,12 @@ public final class VehicleGroup {
         this.bones = bones;
     }
 
-    public static VehicleGroup createRoot(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
-        return new VehicleGroup(null, name, sender, boneConfiguration);
+    public static VehicleGroup createRoot(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
+        return new VehicleGroup(null, name, sender, boneFactory);
     }
 
-    public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
-        VehicleGroup child = new VehicleGroup(this, name, sender, boneConfiguration);
+    public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
+        VehicleGroup child = new VehicleGroup(this, name, sender, boneFactory);
         this.children.add(child);
         return child;
     }

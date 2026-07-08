@@ -1,7 +1,17 @@
 package me.bestnuts.api.manager;
 
-import me.bestnuts.api.model.vehicle.configuration.GroupImplConfiguration;
-import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
+import lombok.Getter;
+import me.bestnuts.api.model.vehicle.component.VehicleBone;
+import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
 
-public interface BoneFactory extends Factory<VehicleConfiguration, GroupImplConfiguration> {
+import java.util.List;
+
+public abstract class BoneFactory implements Factory<BoneFactorySender, List<VehicleBone>> {
+
+    @Getter
+    private final EntityFactory entityFactory;
+
+    public BoneFactory(EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
+    }
 }

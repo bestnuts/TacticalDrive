@@ -1,18 +1,49 @@
 package me.bestnuts.core.manager;
 
+import me.bestnuts.api.manager.BoneCreator;
+import me.bestnuts.api.manager.BoneCreatorHelper;
 import me.bestnuts.api.manager.BoneFactory;
-import me.bestnuts.api.model.vehicle.configuration.GroupImplConfiguration;
-import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
+import me.bestnuts.api.manager.EntityFactory;
+import me.bestnuts.api.model.vehicle.component.*;
+import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
+import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
+import me.bestnuts.core.model.vehicle.component.ModelEntity;
+import me.bestnuts.core.model.vehicle.component.SeatEntity;
+import me.bestnuts.core.model.vehicle.component.WheelEntity;
 import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
-public class CarBoneFactory implements BoneFactory {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class CarBoneFactory extends BoneFactory {
+
+    private static final Map<String, BoneCreator> function = BoneCreatorHelper.functionMapping(Map.of(
+            VehicleModel.class, ModelEntity::new,
+            VehicleWheel.class, WheelEntity::new,
+            VehicleSeat.class, SeatEntity::new
+    ));
+
+    public CarBoneFactory(EntityFactory entityFactory) {
+        super(entityFactory);
+    }
 
     @Override
-    public @Nullable GroupImplConfiguration generate(@NotNull VehicleConfiguration configuration) {
-        ConfigurationSection section = configuration.getConfiguration().getConfigurationSection("group");
-        if (section == null) return null;
-        return new GroupImplConfiguration(configuration, section);
+    public List<VehicleBone> generate(@NonNull BoneFactorySender boneFactorySender) {
+        List<VehicleBone> bones = new ArrayList<>();
+        EntityFactorySender sender = boneFactorySender.sender();
+        ConfigurationSection section = sender.section();
+        VehicleGroup group = boneFactorySender.group();
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection boneSection = section.getConfigurationSection(key);
+            if (boneSection == null) continue;
+            BoneCreator creator = function.get(boneSection.getString("type"));
+            if (creator == null) continue;
+            EntityFactorySender entityFactorySender = sender.withSection(boneSection);
+            VehicleBone bone = creator.create(group, getEntityFactory().generate(entityFactorySender));
+            bones.add(bone);
+        }
+        return bones;
     }
 }
