@@ -39,7 +39,8 @@ public class CarBoneConfiguration extends BoneAbstractConfiguration {
             BoneCreator creator = function.get(boneSection.getString("type"));
             if (creator == null) continue;
             EntityFactorySender entityFactorySender = sender.withSection(boneSection);
-            creator.create(group, getEntityFactory().generate(entityFactorySender));
+            VehicleBone bone = creator.create(group, getEntityFactory().generate(entityFactorySender));
+            bones.add(bone);
         }
         return bones;
     }
