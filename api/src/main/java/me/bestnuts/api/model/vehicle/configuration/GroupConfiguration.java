@@ -12,7 +12,9 @@ public interface GroupConfiguration extends SharedConfiguration {
 
     @NotNull List<GroupConfiguration> children();
 
-    @Nullable ConfigurationSection section();
+    @NotNull String groupName();
+
+    @Nullable ConfigurationSection boneSection();
 
     @NotNull VehicleGroup create(@NotNull EntityFactorySender sender);
 }

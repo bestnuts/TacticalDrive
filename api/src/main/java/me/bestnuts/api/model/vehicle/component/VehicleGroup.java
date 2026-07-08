@@ -12,27 +12,36 @@ import java.util.function.Consumer;
 public final class VehicleGroup {
 
     @Nullable private final VehicleGroup parent;
+    @NotNull private final String name;
     @NotNull private final List<VehicleBone> bones;
     @NotNull private final List<VehicleGroup> children = new ArrayList<>();
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
         this.parent = parent;
+        this.name = name;
         this.bones = sender == null ? List.of() : boneConfiguration.create(this, sender);
     }
 
-    public static VehicleGroup createRoot(@Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
-        return new VehicleGroup(null, sender, boneConfiguration);
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<VehicleBone> bones) {
+        this.parent = parent;
+        this.name = name;
+        this.bones = bones;
     }
 
-    @Nullable
-    public VehicleGroup parent() {
-        return parent;
+    public static VehicleGroup createRoot(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+        return new VehicleGroup(null, name, sender, boneConfiguration);
     }
 
-    public VehicleGroup addChild(@Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
-        VehicleGroup child = new VehicleGroup(this, sender, boneConfiguration);
+    public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneConfiguration boneConfiguration) {
+        VehicleGroup child = new VehicleGroup(this, name, sender, boneConfiguration);
         this.children.add(child);
         return child;
+    }
+
+    @NotNull
+    public String getAbsolutePath() {
+        if (parent == null) return name;
+        return parent.name() + "." + name;
     }
 
     public void consumerTransition(Consumer<VehicleGroup> consumer) {
@@ -40,6 +49,16 @@ public final class VehicleGroup {
         for (VehicleGroup group : children) {
             group.consumerTransition(consumer);
         }
+    }
+
+    @Nullable
+    public VehicleGroup parent() {
+        return parent;
+    }
+
+    @NotNull
+    public String name() {
+        return name;
     }
 
     @NotNull
