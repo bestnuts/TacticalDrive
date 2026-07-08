@@ -63,7 +63,7 @@ public final class GroupImplConfiguration implements GroupConfiguration {
             EntityFactorySender newSender = childConfig.section() == null ? null : sender.withSection(childConfig.section());
             VehicleGroup childGroup = parentGroup.addChild(newSender, parent.getBone());
 
-            buildTree(childGroup, childConfig, newSender);
+            buildTree(childGroup, childConfig, sender);
         }
     }
 
