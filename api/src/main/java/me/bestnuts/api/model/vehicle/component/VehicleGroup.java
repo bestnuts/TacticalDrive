@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class VehicleGroup {
 
@@ -36,6 +37,13 @@ public final class VehicleGroup {
         VehicleGroup child = new VehicleGroup(this, sender, boneConfiguration);
         this.children.add(child);
         return child;
+    }
+
+    public void consumerTransition(Consumer<VehicleGroup> consumer) {
+        consumer.accept(this);
+        for (VehicleGroup group : children) {
+            group.consumerTransition(consumer);
+        }
     }
 
     @NotNull

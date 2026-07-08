@@ -43,10 +43,12 @@ public class CarFactory implements VehicleFactory {
             GroupImplConfiguration group = boneFactory.generate(vehicleConfiguration);
             if (group == null) return null;
             EntityFactorySender entityFactorySender = new EntityFactorySender(sender.location(), configuration);
-            VehicleGroup vehicleGroup = group.create(entityFactorySender);
             Entity entity = entityFactory.generate(entityFactorySender);
+            VehicleGroup vehicleGroup = group.create(entityFactorySender);
             VehicleRoot root = new VehicleRoot(entity);
-            return new VehicleCar(root, vehicleGroup, vehicleConfiguration);
+            Vehicle vehicle = new VehicleCar(root, vehicleGroup, vehicleConfiguration);
+            applyDataKey(vehicle);
+            return vehicle;
         }
         return null;
     }

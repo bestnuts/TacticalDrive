@@ -11,6 +11,7 @@ import me.bestnuts.core.repository.GlobalRepository;
 import me.bestnuts.plugin.command.Arguments;
 import me.bestnuts.plugin.command.CommandNode;
 import me.bestnuts.plugin.command.Commands;
+import me.bestnuts.plugin.listener.PlayerInteraction;
 import me.bestnuts.plugin.listener.PlayerLifecycle;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -39,7 +40,9 @@ public final class TacticalDrive extends JavaPlugin {
     }
 
     private void register() {
+        Bukkit.getPluginManager().registerEvents(new PlayerInteraction(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository), this);
+
         final LifecycleEventManager<@NotNull Plugin> lifecycleManager = this.getLifecycleManager();
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, (event) -> {
             event.registrar().register(command().build().build(), "탈것 명령어", List.of("탈것", "xkfrjt"));

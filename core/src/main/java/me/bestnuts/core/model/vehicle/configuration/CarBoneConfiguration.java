@@ -3,14 +3,12 @@ package me.bestnuts.core.model.vehicle.configuration;
 import me.bestnuts.api.manager.BoneCreator;
 import me.bestnuts.api.manager.BoneCreatorHelper;
 import me.bestnuts.api.manager.EntityFactory;
-import me.bestnuts.api.model.vehicle.component.VehicleBone;
-import me.bestnuts.api.model.vehicle.component.VehicleGroup;
-import me.bestnuts.api.model.vehicle.component.VehicleModel;
-import me.bestnuts.api.model.vehicle.component.VehicleWheel;
+import me.bestnuts.api.model.vehicle.component.*;
 import me.bestnuts.api.model.vehicle.configuration.BoneAbstractConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
 import me.bestnuts.core.model.vehicle.component.ModelEntity;
+import me.bestnuts.core.model.vehicle.component.SeatEntity;
 import me.bestnuts.core.model.vehicle.component.WheelEntity;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +21,8 @@ public class CarBoneConfiguration extends BoneAbstractConfiguration {
 
     private static final Map<String, BoneCreator> function = BoneCreatorHelper.functionMapping(Map.of(
             VehicleModel.class, ModelEntity::new,
-            VehicleWheel.class, WheelEntity::new
+            VehicleWheel.class, WheelEntity::new,
+            VehicleSeat.class, SeatEntity::new
     ));
 
     public CarBoneConfiguration(@NotNull EntityFactory entityFactory, @NotNull VehicleConfiguration parent) {
