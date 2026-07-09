@@ -2,6 +2,7 @@ package me.bestnuts.core.manager;
 
 import me.bestnuts.api.manager.Manager;
 import me.bestnuts.api.model.vehicle.Vehicle;
+import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -42,7 +43,7 @@ public final class VehicleManager implements me.bestnuts.api.manager.VehicleMana
     }
 
     @Override
-    public @NotNull Collection<Vehicle> getByType(Vehicle.RegistryType type) {
+    public @NotNull Collection<Vehicle> getByType(VehicleRegistryType type) {
         Map<UUID, Vehicle> subMap = typeMap.get(type.getName());
         return subMap != null ? Collections.unmodifiableCollection(subMap.values()) : Collections.emptyList();
     }

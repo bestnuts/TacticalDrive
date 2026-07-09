@@ -3,8 +3,9 @@ package me.bestnuts.api.manager;
 import me.bestnuts.api.model.vehicle.component.VehicleBone;
 import me.bestnuts.api.model.vehicle.component.VehicleGroup;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface BoneCreator {
-    VehicleBone create(VehicleGroup group, Entity entity, String type);
+    VehicleBone create(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type);
 }

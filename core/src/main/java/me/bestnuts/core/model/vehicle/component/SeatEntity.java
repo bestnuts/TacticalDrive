@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class SeatEntity extends VehicleSeat {
 
-    public SeatEntity(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
-        super(group, entity, type);
+    public SeatEntity(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
+        super(entity, group, type);
     }
 }

@@ -16,7 +16,7 @@ public abstract class VehicleSeat extends VehicleBone {
     @Setter
     private Driver driver;
 
-    public VehicleSeat(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
-        super(group, entity, type);
+    public VehicleSeat(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
+        super(entity, group, type);
     }
 }

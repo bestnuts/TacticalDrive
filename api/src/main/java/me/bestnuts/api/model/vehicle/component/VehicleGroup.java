@@ -2,7 +2,9 @@ package me.bestnuts.api.model.vehicle.component;
 
 import me.bestnuts.api.manager.BoneFactory;
 import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
+import me.bestnuts.api.model.vehicle.dto.BoneRestoreFactorySender;
 import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -23,18 +25,26 @@ public final class VehicleGroup {
         this.bones = sender == null ? List.of() : boneFactory.generate(new BoneFactorySender(this, sender));
     }
 
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
+        this.parent = parent;
+        this.name = name;
+        this.bones = boneFactory.regenerate(new BoneRestoreFactorySender(this, entities));
+    }
+
     public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<VehicleBone> bones) {
         this.parent = parent;
         this.name = name;
         this.bones = bones;
     }
 
-    public static VehicleGroup createRoot(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
-        return new VehicleGroup(null, name, sender, boneFactory);
-    }
-
     public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
         VehicleGroup child = new VehicleGroup(this, name, sender, boneFactory);
+        this.children.add(child);
+        return child;
+    }
+
+    public VehicleGroup addChild(@NotNull String name, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
+        VehicleGroup child = new VehicleGroup(this, name, entities, boneFactory);
         this.children.add(child);
         return child;
     }

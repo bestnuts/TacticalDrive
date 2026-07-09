@@ -1,32 +1,35 @@
 package me.bestnuts.api.model.vehicle;
 
-import lombok.Getter;
 import me.bestnuts.api.model.vehicle.component.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-public interface Vehicle {
+public abstract class Vehicle {
 
-    @NotNull String type();
+    private final VehicleEntity entity;
+    private final VehicleGroup group;
+    private final VehicleConfiguration configuration;
 
-    @NotNull VehicleEntity entity();
-
-    @NotNull VehicleConfiguration configuration();
-
-    @NotNull VehicleGroup group();
-
-    void tick();
-
-    @Getter
-    enum RegistryType {
-        CAR("car"),
-        HELI("heli");
-
-        private final String name;
-
-        RegistryType(String name) {
-            this.name = name;
-        }
+    public Vehicle(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
+        this.entity = entity;
+        this.group = group;
+        this.configuration = configuration;
     }
+
+    public @NotNull VehicleEntity entity() {
+        return entity;
+    }
+
+    public @NotNull VehicleGroup group() {
+        return group;
+    }
+
+    public @NotNull VehicleConfiguration configuration() {
+        return configuration;
+    }
+
+    public abstract @NotNull String type();
+
+    public abstract void tick();
 }

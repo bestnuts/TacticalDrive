@@ -27,6 +27,9 @@ public abstract class VehicleConfigurationFactory implements ConfigurationFactor
         this.entityFactory = entityFactory;
     }
 
+    @Override
+    public abstract @NotNull VehicleConfiguration generate(@NotNull FileConfiguration configuration);
+
     public abstract @Nullable VehicleConfiguration generate(String name);
 
     @NotNull

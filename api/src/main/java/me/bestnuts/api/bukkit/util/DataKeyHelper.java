@@ -6,7 +6,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class DataKeyRegister {
+public final class DataKeyHelper {
 
     public static boolean has(@NotNull PersistentDataHolder holder, @NotNull DataKey key) {
         return holder.getPersistentDataContainer().getKeys().contains(key.key());

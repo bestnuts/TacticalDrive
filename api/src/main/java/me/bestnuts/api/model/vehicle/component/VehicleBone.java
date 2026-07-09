@@ -1,38 +1,18 @@
 package me.bestnuts.api.model.vehicle.component;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 @Getter
-@RequiredArgsConstructor
-public abstract class VehicleBone implements VehicleEntity {
+public abstract class VehicleBone extends VehicleEntity {
 
     @NotNull private final VehicleGroup group;
-    @NotNull private final Entity entity;
     @NotNull private final String type;
 
-    @Override
-    public @NotNull Entity getEntity() {
-        return entity;
-    }
-
-    @Override
-    public @NotNull Location getLocation() {
-        return entity.getLocation();
-    }
-
-    @Override
-    public @NotNull UUID getUniqueId() {
-        return entity.getUniqueId();
-    }
-
-    @Override
-    public boolean isValid() {
-        return entity.isValid();
+    public VehicleBone(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
+        super(entity);
+        this.group = group;
+        this.type = type;
     }
 }

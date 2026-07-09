@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 @BoneType("model")
 public abstract class VehicleModel extends VehicleBone {
 
-    public VehicleModel(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
-        super(group, entity, type);
+    public VehicleModel(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
+        super(entity, group, type);
     }
 }

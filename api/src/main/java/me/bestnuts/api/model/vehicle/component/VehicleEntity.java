@@ -1,21 +1,31 @@
 package me.bestnuts.api.model.vehicle.component;
 
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public interface VehicleEntity {
+@RequiredArgsConstructor
+public class VehicleEntity {
 
     @NotNull
-    Entity getEntity();
+    private final Entity entity;
 
-    @NotNull
-    Location getLocation();
+    public @NotNull Entity getEntity() {
+        return entity;
+    }
 
-    @NotNull
-    UUID getUniqueId();
+    public @NotNull Location getLocation() {
+        return entity.getLocation();
+    }
 
-    boolean isValid();
+    public @NotNull UUID getUniqueId() {
+        return entity.getUniqueId();
+    }
+
+    public boolean isValid() {
+        return entity.isValid();
+    }
 }

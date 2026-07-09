@@ -3,6 +3,7 @@ package me.bestnuts.core.repository;
 import lombok.Getter;
 import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.api.manager.GroupFactory;
+import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.core.manager.CarBoneFactory;
 import me.bestnuts.core.manager.CarConfigurationFactory;
 import me.bestnuts.core.manager.CarFactory;
@@ -13,7 +14,7 @@ import java.io.File;
 @Getter
 public final class CarRepository {
 
-    private final CarFactory carFactory;
+    private final VehicleFactory carFactory;
 
     public CarRepository(SharedRepository shared, @NotNull File dir) {
         GroupFactory groupFactory = new GroupFactory(new CarBoneFactory(shared.getEntityFactory()));
