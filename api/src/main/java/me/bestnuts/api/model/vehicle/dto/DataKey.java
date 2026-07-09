@@ -8,7 +8,8 @@ public enum DataKey {
 
     VEHICLE_ROOT_TYPE("vehicle_root_type"),
     VEHICLE_ROOT_ID("vehicle_root_id"),
-    VEHICLE_BONE_TYPE("vehicle_bone_type");
+    VEHICLE_BONE_TYPE("vehicle_bone_type"),
+    VEHICLE_BONE_GROUP("vehicle_bone_group");
 
     private final String key;
     private NamespacedKey namespacedKey;
