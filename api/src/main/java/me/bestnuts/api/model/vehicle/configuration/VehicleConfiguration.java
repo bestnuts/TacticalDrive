@@ -19,14 +19,15 @@ public abstract class VehicleConfiguration implements SharedConfiguration {
     private final String name;
 
     public VehicleConfiguration(@NotNull VehicleConfigurationFactory factory,
-                                @NotNull FileConfiguration configuration) {
+                                @NotNull FileConfiguration configuration,
+                                @NotNull String name) {
         this.configuration = configuration;
         defaultConfiguration = factory.getConfiguration(DefaultConfiguration.class, this, configuration);
         fuel = factory.getConfiguration(FuelConfiguration.class, this, configuration);
         handle = factory.getConfiguration(HandleConfiguration.class, this, configuration);
         physics = factory.getConfiguration(PhysicsConfiguration.class, this, configuration);
 
-        name = configuration.getName();
+        this.name = name;
     }
 
     @Override

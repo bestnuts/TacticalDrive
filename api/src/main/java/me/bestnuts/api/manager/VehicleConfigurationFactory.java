@@ -3,6 +3,7 @@ package me.bestnuts.api.manager;
 import lombok.Getter;
 import me.bestnuts.api.model.vehicle.configuration.SharedConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
+import me.bestnuts.api.model.vehicle.dto.ConfigurationFactorySender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,9 +29,9 @@ public abstract class VehicleConfigurationFactory implements ConfigurationFactor
     }
 
     @Override
-    public abstract @NotNull VehicleConfiguration generate(@NotNull FileConfiguration configuration);
+    public abstract @NotNull VehicleConfiguration generate(@NotNull ConfigurationFactorySender sender);
 
-    public abstract @Nullable VehicleConfiguration generate(String name);
+    public abstract @Nullable VehicleConfiguration generate(@NotNull String name);
 
     @NotNull
     public <C extends SharedConfiguration> VehicleConfigurationFactory register(

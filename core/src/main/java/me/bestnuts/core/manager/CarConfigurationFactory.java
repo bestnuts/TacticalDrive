@@ -6,6 +6,7 @@ import me.bestnuts.api.model.vehicle.configuration.DefaultConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.FuelConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.HandleConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.PhysicsConfiguration;
+import me.bestnuts.api.model.vehicle.dto.ConfigurationFactorySender;
 import me.bestnuts.core.model.vehicle.configuration.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -39,14 +40,14 @@ public class CarConfigurationFactory extends VehicleConfigurationFactory {
 
     @Override
     @NotNull
-    public CarConfiguration generate(@NotNull FileConfiguration configuration) {
-        return new CarConfiguration(this, configuration);
+    public CarConfiguration generate(@NotNull ConfigurationFactorySender sender) {
+        return new CarConfiguration(this, sender);
     }
 
     @Override
     @Nullable
-    public CarConfiguration generate(String name) {
+    public CarConfiguration generate(@NotNull String name) {
         Optional<FileConfiguration> optional = parameter(name);
-        return optional.map(this::generate).orElse(null);
+        return optional.map(configuration -> generate(new ConfigurationFactorySender(configuration, name))).orElse(null);
     }
 }

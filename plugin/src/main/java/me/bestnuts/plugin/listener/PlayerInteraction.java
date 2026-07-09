@@ -45,6 +45,8 @@ public class PlayerInteraction implements Listener {
                 VehicleFactory factory = VehicleFactoryHook.getHooks(type);
                 if (factory == null) return;
                 Vehicle vehicle = factory.regenerate(root);
+                if (vehicle == null) return;
+                vehicleManager.register(vehicle);
             });
         });
     }
