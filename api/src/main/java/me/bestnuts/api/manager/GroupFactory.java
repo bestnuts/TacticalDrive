@@ -57,7 +57,7 @@ public final class GroupFactory implements Factory<GroupFactorySender, VehicleGr
         VehicleConfiguration configuration = sender.configuration();
         ConfigurationSection section = configuration.getConfiguration().getConfigurationSection("group");
         if (section == null) return null;
-        return null;
+        return getGroup(new GroupImplConfiguration(configuration, section), sender.entities());
     }
 
     public @NotNull VehicleGroup getGroup(@NotNull GroupImplConfiguration configuration, @NotNull List<Entity> entities) {
