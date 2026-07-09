@@ -38,10 +38,11 @@ public class CarBoneFactory extends BoneFactory {
         for (String key : section.getKeys(false)) {
             ConfigurationSection boneSection = section.getConfigurationSection(key);
             if (boneSection == null) continue;
-            BoneCreator creator = function.get(boneSection.getString("type"));
+            String boneType = boneSection.getString("type");
+            BoneCreator creator = function.get(boneType);
             if (creator == null) continue;
             EntityFactorySender entityFactorySender = sender.withSection(boneSection);
-            VehicleBone bone = creator.create(group, getEntityFactory().generate(entityFactorySender));
+            VehicleBone bone = creator.create(group, getEntityFactory().generate(entityFactorySender), boneType);
             bones.add(bone);
         }
         return bones;

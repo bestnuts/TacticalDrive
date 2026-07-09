@@ -9,8 +9,8 @@ public abstract class VehicleDoor extends VehicleBone {
 
     private boolean closed = true;
 
-    public VehicleDoor(@NotNull VehicleGroup group, @NotNull Entity entity) {
-        super(group, entity);
+    public VehicleDoor(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
+        super(group, entity, type);
     }
 
     public void open() {

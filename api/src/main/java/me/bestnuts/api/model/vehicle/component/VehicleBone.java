@@ -14,6 +14,7 @@ public abstract class VehicleBone implements VehicleEntity {
 
     @NotNull private final VehicleGroup group;
     @NotNull private final Entity entity;
+    @NotNull private final String type;
 
     @Override
     public @NotNull Entity getEntity() {

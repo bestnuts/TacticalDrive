@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class WheelEntity extends VehicleWheel {
 
-    public WheelEntity(@NotNull VehicleGroup group, @NotNull Entity entity) {
-        super(group, entity);
+    public WheelEntity(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
+        super(group, entity, type);
     }
 
     @Override

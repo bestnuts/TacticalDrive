@@ -6,5 +6,5 @@ import org.bukkit.entity.Entity;
 
 @FunctionalInterface
 public interface BoneCreator {
-    VehicleBone create(VehicleGroup group, Entity entity);
+    VehicleBone create(VehicleGroup group, Entity entity, String type);
 }

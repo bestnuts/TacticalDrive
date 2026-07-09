@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 @BoneType("wheel")
 public abstract class VehicleWheel extends VehicleBone {
 
-    public VehicleWheel(@NotNull VehicleGroup group, @NotNull Entity entity) {
-        super(group, entity);
+    public VehicleWheel(@NotNull VehicleGroup group, @NotNull Entity entity, @NotNull String type) {
+        super(group, entity, type);
     }
 
     public abstract WheelContact contact();
