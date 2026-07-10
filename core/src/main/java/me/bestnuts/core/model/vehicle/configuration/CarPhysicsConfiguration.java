@@ -5,7 +5,7 @@ import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-public class CarPhysicsConfiguration extends PhysicsConfiguration {
+public final class CarPhysicsConfiguration extends PhysicsConfiguration {
 
     public CarPhysicsConfiguration(@NotNull VehicleConfiguration parent, @NotNull FileConfiguration configuration) {
         super(parent, configuration);

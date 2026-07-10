@@ -7,7 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class CarHandleConfiguration extends HandleConfiguration {
+public final class CarHandleConfiguration extends HandleConfiguration {
 
     private final double wheelFriction;
     private final double steeringAngleMax;

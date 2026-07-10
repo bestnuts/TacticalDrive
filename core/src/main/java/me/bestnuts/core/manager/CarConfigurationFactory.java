@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.Optional;
 
-public class CarConfigurationFactory extends VehicleConfigurationFactory {
+public final class CarConfigurationFactory extends VehicleConfigurationFactory {
 
     private final File dir;
 

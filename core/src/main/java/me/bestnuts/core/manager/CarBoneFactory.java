@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class CarBoneFactory extends BoneFactory {
+public final class CarBoneFactory extends BoneFactory {
 
     private static final Map<String, BoneCreator> function = BoneCreatorHelper.functionMapping(Map.of(
             VehicleModel.class, ModelEntity::new,

@@ -6,7 +6,7 @@ import me.bestnuts.core.manager.CarConfigurationFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CarConfiguration extends VehicleConfiguration {
+public final class CarConfiguration extends VehicleConfiguration {
 
     private final CarConfigurationFactory factory;
 

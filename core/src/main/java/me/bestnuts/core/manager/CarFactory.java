@@ -6,7 +6,7 @@ import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.core.model.vehicle.VehicleCar;
 import org.jetbrains.annotations.NotNull;
 
-public class CarFactory extends VehicleFactory {
+public final class CarFactory extends VehicleFactory {
 
     public CarFactory(EntityFactory entityFactory,
                       GroupFactory groupFactory,

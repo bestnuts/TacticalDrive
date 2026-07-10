@@ -5,7 +5,7 @@ import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-public class SharedFuelConfiguration extends FuelConfiguration {
+public final class SharedFuelConfiguration extends FuelConfiguration {
 
     public SharedFuelConfiguration(@NotNull VehicleConfiguration parent, @NotNull FileConfiguration configuration) {
         super(parent, configuration);

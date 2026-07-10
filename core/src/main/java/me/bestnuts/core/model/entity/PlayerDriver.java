@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Setter
 @RequiredArgsConstructor
-public class PlayerDriver implements Driver {
+public final class PlayerDriver implements Driver {
 
     private final Player player;
 
