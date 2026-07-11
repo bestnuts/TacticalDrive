@@ -5,9 +5,9 @@ import me.bestnuts.api.model.vehicle.component.VehicleBone;
 import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
 import me.bestnuts.api.model.vehicle.dto.BoneRestoreFactorySender;
 
-import java.util.List;
+import java.util.Map;
 
-public abstract class BoneFactory implements Factory<BoneFactorySender, List<VehicleBone>>, RestoreFactory<BoneRestoreFactorySender, List<VehicleBone>> {
+public abstract class BoneFactory implements Factory<BoneFactorySender, Map<String, VehicleBone>>, RestoreFactory<BoneRestoreFactorySender, Map<String, VehicleBone>> {
 
     @Getter
     private final EntityFactory entityFactory;

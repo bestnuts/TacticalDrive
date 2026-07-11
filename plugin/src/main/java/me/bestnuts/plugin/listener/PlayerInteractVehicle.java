@@ -62,7 +62,7 @@ public class PlayerInteractVehicle implements Listener {
     }
 
     private void findBoneById(UUID id, Vehicle vehicle, Driver driver, BiConsumer<Driver, VehicleBone> consumer) {
-        vehicle.findByIdBone(id).ifPresent(bone -> consumer.accept(driver, bone));
+        vehicle.findBoneById(id).ifPresent(bone -> consumer.accept(driver, bone));
     }
 
     private void consumeVehicle(Player player, Entity entity, Predicate<Driver> predicate, BiConsumer<Driver, Vehicle> consumer) {

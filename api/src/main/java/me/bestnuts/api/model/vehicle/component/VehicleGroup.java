@@ -8,27 +8,26 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public final class VehicleGroup {
 
     @Nullable private final VehicleGroup parent;
     @NotNull private final String name;
-    @NotNull private final List<VehicleBone> bones;
+    @NotNull private final Map<String, VehicleBone> boneMap;
     @NotNull private final List<VehicleGroup> children = new ArrayList<>();
 
     public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
         this.parent = parent;
         this.name = name;
-        this.bones = sender == null ? List.of() : boneFactory.generate(new BoneFactorySender(this, sender));
+        this.boneMap = sender == null ? Map.of() : boneFactory.generate(new BoneFactorySender(this, sender));
     }
 
     public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
         this.parent = parent;
         this.name = name;
-        this.bones = boneFactory.regenerate(new BoneRestoreFactorySender(this, new ArrayList<>(entities)));
+        this.boneMap = boneFactory.regenerate(new BoneRestoreFactorySender(this, new ArrayList<>(entities)));
     }
 
     public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
@@ -72,7 +71,12 @@ public final class VehicleGroup {
     }
 
     @NotNull
-    public List<VehicleBone> bones() {
-        return bones;
+    public Optional<VehicleBone> findBoneByName(String name) {
+        return Optional.ofNullable(boneMap.get(name));
+    }
+
+    @NotNull
+    public Collection<VehicleBone> bones() {
+        return boneMap.values();
     }
 }

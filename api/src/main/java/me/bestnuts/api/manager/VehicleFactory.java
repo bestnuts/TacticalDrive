@@ -78,6 +78,7 @@ public abstract class VehicleFactory implements Factory<VehicleFactorySender, Ve
         Entity entity = bone.getEntity();
         DataKeyHelper.set(entity, DataKey.VEHICLE_ROOT_ID, rootId);
         DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_TYPE, bone.getType());
+        DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_NAME, bone.getName());
         DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_GROUP, path);
     }
 }

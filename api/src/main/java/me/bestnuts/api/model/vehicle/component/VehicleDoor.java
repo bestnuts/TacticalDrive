@@ -1,6 +1,7 @@
 package me.bestnuts.api.model.vehicle.component;
 
 import me.bestnuts.api.manager.BoneType;
+import me.bestnuts.api.model.vehicle.dto.BoneData;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,8 +10,8 @@ public abstract class VehicleDoor extends VehicleBone {
 
     private boolean closed = true;
 
-    public VehicleDoor(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
-        super(entity, group, type);
+    public VehicleDoor(@NotNull Entity entity, @NotNull BoneData data) {
+        super(entity, data);
     }
 
     public void open() {

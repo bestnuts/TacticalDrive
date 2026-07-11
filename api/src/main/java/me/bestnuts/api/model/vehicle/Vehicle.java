@@ -45,7 +45,7 @@ public abstract class Vehicle {
         return group;
     }
 
-    public @NotNull Optional<VehicleBone> findByIdBone(@NotNull UUID id) {
+    public @NotNull Optional<VehicleBone> findBoneById(@NotNull UUID id) {
         return Optional.ofNullable(byIdBoneMap.get(id));
     }
 

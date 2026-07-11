@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.bestnuts.api.manager.BoneType;
 import me.bestnuts.api.model.entity.Driver;
+import me.bestnuts.api.model.vehicle.dto.BoneData;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,7 @@ public abstract class VehicleSeat extends VehicleBone {
     @Setter
     private Driver driver;
 
-    public VehicleSeat(@NotNull Entity entity, @NotNull VehicleGroup group, @NotNull String type) {
-        super(entity, group, type);
+    public VehicleSeat(@NotNull Entity entity, @NotNull BoneData data) {
+        super(entity, data);
     }
 }
