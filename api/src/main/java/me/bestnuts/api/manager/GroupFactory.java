@@ -45,7 +45,8 @@ public final class GroupFactory implements Factory<GroupFactorySender, VehicleGr
 
     private void buildTree(@NotNull VehicleGroup parentGroup, @NotNull GroupConfiguration parentConfig, @NotNull EntityFactorySender sender) {
         for (GroupConfiguration childConfig : parentConfig.children()) {
-            EntityFactorySender newSender = childConfig.boneSection() == null ? null : sender.withSection(childConfig.boneSection());
+            ConfigurationSection boneSection = childConfig.boneSection();
+            EntityFactorySender newSender = boneSection == null ? null : sender.withSection(boneSection);
             VehicleGroup childGroup = parentGroup.addChild(childConfig.groupName(), newSender, boneFactory);
 
             buildTree(childGroup, childConfig, sender);
