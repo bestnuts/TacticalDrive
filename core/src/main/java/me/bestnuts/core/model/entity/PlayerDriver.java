@@ -43,7 +43,17 @@ public final class PlayerDriver implements Driver {
     }
 
     @Override
+    public void setSeatedVehicle(@NotNull Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    @Override
     public @NotNull Optional<VehicleSeat> getSeated() {
         return Optional.ofNullable(seat);
+    }
+
+    @Override
+    public void setSeatedVehicleSeat(@NotNull VehicleSeat seat) {
+        this.seat = seat;
     }
 }

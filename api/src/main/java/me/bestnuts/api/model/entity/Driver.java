@@ -5,6 +5,7 @@ import me.bestnuts.api.model.vehicle.component.VehicleSeat;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,10 @@ public interface Driver {
     @NotNull
     Optional<Vehicle> getSeatedVehicle();
 
+    void setSeatedVehicle(@Nullable Vehicle vehicle);
+
     @NotNull
     Optional<VehicleSeat> getSeated();
+
+    void setSeatedVehicleSeat(@Nullable VehicleSeat seat);
 }
