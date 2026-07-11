@@ -31,12 +31,6 @@ public final class VehicleGroup {
         this.bones = boneFactory.regenerate(new BoneRestoreFactorySender(this, new ArrayList<>(entities)));
     }
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<VehicleBone> bones) {
-        this.parent = parent;
-        this.name = name;
-        this.bones = bones;
-    }
-
     public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
         VehicleGroup child = new VehicleGroup(this, name, sender, boneFactory);
         this.children.add(child);
