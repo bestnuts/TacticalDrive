@@ -35,8 +35,8 @@ public abstract class VehicleConfigurationFactory implements ConfigurationFactor
 
     @NotNull
     public <C extends SharedConfiguration> VehicleConfigurationFactory register(
-            Class<C> type,
-            BiFunction<VehicleConfiguration, FileConfiguration, ? extends C> creator) {
+            @NotNull Class<C> type,
+            @NotNull BiFunction<VehicleConfiguration, FileConfiguration, ? extends C> creator) {
         this.function.put(type, creator::apply);
         return this;
     }

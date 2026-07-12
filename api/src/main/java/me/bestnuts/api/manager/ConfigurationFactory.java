@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ConfigurationFactory extends Factory<ConfigurationFactorySender, SharedConfiguration> {
 
-    @NotNull Optional<FileConfiguration> parameter(String name);
+    @NotNull Optional<FileConfiguration> parameter(@NotNull String name);
 
     <C extends SharedConfiguration> C getConfiguration(@NotNull Class<C> type, @NotNull VehicleConfiguration parent, @NotNull FileConfiguration configuration);
 }

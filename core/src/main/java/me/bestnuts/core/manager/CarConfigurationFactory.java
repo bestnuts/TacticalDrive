@@ -32,7 +32,7 @@ public final class CarConfigurationFactory extends VehicleConfigurationFactory {
 
     @Override
     @NotNull
-    public Optional<FileConfiguration> parameter(String name) {
+    public Optional<FileConfiguration> parameter(@NotNull String name) {
         File file = new File(dir, name.concat(".yml"));
         if (!file.exists()) return Optional.empty();
         return Optional.of(YamlConfiguration.loadConfiguration(file));
