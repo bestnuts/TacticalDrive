@@ -1,7 +1,7 @@
 package me.bestnuts.api.model.vehicle.component;
 
 import lombok.Getter;
-import me.bestnuts.api.model.vehicle.dto.BoneData;
+import me.bestnuts.api.model.vehicle.data.BoneData;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 

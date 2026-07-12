@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.manager.VehicleManager;
 import me.bestnuts.api.model.vehicle.Vehicle;
-import me.bestnuts.api.model.vehicle.dto.VehicleFactorySender;
+import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 
 @RequiredArgsConstructor
 public final class VehicleService {

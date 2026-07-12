@@ -1,6 +1,6 @@
 package me.bestnuts.api.bukkit.util;
 
-import me.bestnuts.api.model.vehicle.dto.DataKey;
+import me.bestnuts.api.model.vehicle.data.DataKey;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;

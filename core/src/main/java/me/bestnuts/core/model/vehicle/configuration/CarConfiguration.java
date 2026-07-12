@@ -1,7 +1,7 @@
 package me.bestnuts.core.model.vehicle.configuration;
 
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
-import me.bestnuts.api.model.vehicle.dto.ConfigurationFactorySender;
+import me.bestnuts.api.model.vehicle.data.ConfigurationFactorySender;
 import me.bestnuts.core.manager.CarConfigurationFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

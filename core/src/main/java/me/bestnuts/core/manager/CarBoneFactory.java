@@ -6,7 +6,7 @@ import me.bestnuts.api.manager.BoneCreatorHelper;
 import me.bestnuts.api.manager.BoneFactory;
 import me.bestnuts.api.manager.EntityFactory;
 import me.bestnuts.api.model.vehicle.component.*;
-import me.bestnuts.api.model.vehicle.dto.*;
+import me.bestnuts.api.model.vehicle.data.*;
 import me.bestnuts.core.model.vehicle.component.ModelEntity;
 import me.bestnuts.core.model.vehicle.component.SeatEntity;
 import me.bestnuts.core.model.vehicle.component.WheelEntity;

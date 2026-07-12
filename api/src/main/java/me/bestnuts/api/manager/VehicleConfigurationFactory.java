@@ -3,7 +3,7 @@ package me.bestnuts.api.manager;
 import lombok.Getter;
 import me.bestnuts.api.model.vehicle.configuration.SharedConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
-import me.bestnuts.api.model.vehicle.dto.ConfigurationFactorySender;
+import me.bestnuts.api.model.vehicle.data.ConfigurationFactorySender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

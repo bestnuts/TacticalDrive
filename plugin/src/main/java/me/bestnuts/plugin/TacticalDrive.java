@@ -5,7 +5,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import me.bestnuts.api.bukkit.register.PluginProvider;
 import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.api.manager.VehicleFactory;
-import me.bestnuts.api.model.vehicle.dto.VehicleFactorySender;
+import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.core.manager.VehicleService;
 import me.bestnuts.core.repository.GlobalRepository;
 import me.bestnuts.plugin.command.Arguments;

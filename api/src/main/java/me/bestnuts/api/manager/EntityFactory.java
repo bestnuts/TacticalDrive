@@ -1,6 +1,6 @@
 package me.bestnuts.api.manager;
 
-import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
+import me.bestnuts.api.model.vehicle.data.EntityFactorySender;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;

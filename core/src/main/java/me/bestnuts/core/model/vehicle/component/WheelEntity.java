@@ -1,8 +1,8 @@
 package me.bestnuts.core.model.vehicle.component;
 
 import me.bestnuts.api.model.vehicle.component.VehicleWheel;
-import me.bestnuts.api.model.vehicle.dto.BoneData;
-import me.bestnuts.api.model.vehicle.dto.WheelContact;
+import me.bestnuts.api.model.vehicle.data.BoneData;
+import me.bestnuts.api.model.vehicle.data.WheelContact;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 

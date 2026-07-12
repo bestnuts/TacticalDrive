@@ -1,4 +1,4 @@
-package me.bestnuts.api.model.vehicle.dto;
+package me.bestnuts.api.model.vehicle.data;
 
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;

@@ -1,9 +1,9 @@
 package me.bestnuts.api.model.vehicle.component;
 
 import me.bestnuts.api.manager.BoneFactory;
-import me.bestnuts.api.model.vehicle.dto.BoneFactorySender;
-import me.bestnuts.api.model.vehicle.dto.BoneRestoreFactorySender;
-import me.bestnuts.api.model.vehicle.dto.EntityFactorySender;
+import me.bestnuts.api.model.vehicle.data.BoneFactorySender;
+import me.bestnuts.api.model.vehicle.data.BoneRestoreFactorySender;
+import me.bestnuts.api.model.vehicle.data.EntityFactorySender;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 

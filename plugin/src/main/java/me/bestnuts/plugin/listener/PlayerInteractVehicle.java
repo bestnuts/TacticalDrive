@@ -8,7 +8,7 @@ import me.bestnuts.api.model.entity.Driver;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.VehicleBone;
 import me.bestnuts.api.model.vehicle.component.VehicleSeat;
-import me.bestnuts.api.model.vehicle.dto.DataKey;
+import me.bestnuts.api.model.vehicle.data.DataKey;
 import me.bestnuts.core.manager.DriverManager;
 import me.bestnuts.core.repository.GlobalRepository;
 import org.bukkit.entity.Entity;

@@ -8,7 +8,7 @@ import me.bestnuts.api.model.vehicle.component.VehicleBone;
 import me.bestnuts.api.model.vehicle.component.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
-import me.bestnuts.api.model.vehicle.dto.*;
+import me.bestnuts.api.model.vehicle.data.*;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
