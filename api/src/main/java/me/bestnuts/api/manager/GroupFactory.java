@@ -1,6 +1,6 @@
 package me.bestnuts.api.manager;
 
-import me.bestnuts.api.model.vehicle.component.VehicleGroup;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.GroupConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.GroupImplConfiguration;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;

@@ -1,7 +1,7 @@
 package me.bestnuts.api.manager;
 
 import lombok.Getter;
-import me.bestnuts.api.model.vehicle.component.VehicleBone;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleBone;
 import me.bestnuts.api.model.vehicle.data.BoneFactorySender;
 import me.bestnuts.api.model.vehicle.data.BoneRestoreFactorySender;
 

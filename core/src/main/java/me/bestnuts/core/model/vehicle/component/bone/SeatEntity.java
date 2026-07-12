@@ -1,7 +1,7 @@
-package me.bestnuts.core.model.vehicle.component;
+package me.bestnuts.core.model.vehicle.component.bone;
 
 import me.bestnuts.api.model.entity.Driver;
-import me.bestnuts.api.model.vehicle.component.VehicleSeat;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
 import me.bestnuts.api.model.vehicle.data.BoneData;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;

@@ -1,8 +1,8 @@
 package me.bestnuts.api.model.vehicle;
 
-import me.bestnuts.api.model.vehicle.component.VehicleBone;
-import me.bestnuts.api.model.vehicle.component.VehicleEntity;
-import me.bestnuts.api.model.vehicle.component.VehicleGroup;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleBone;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import org.jetbrains.annotations.NotNull;
 

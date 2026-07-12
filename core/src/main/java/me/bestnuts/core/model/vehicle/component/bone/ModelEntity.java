@@ -1,6 +1,6 @@
-package me.bestnuts.core.model.vehicle.component;
+package me.bestnuts.core.model.vehicle.component.bone;
 
-import me.bestnuts.api.model.vehicle.component.VehicleModel;
+import me.bestnuts.api.model.vehicle.component.bone.VehicleModel;
 import me.bestnuts.api.model.vehicle.data.BoneData;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;

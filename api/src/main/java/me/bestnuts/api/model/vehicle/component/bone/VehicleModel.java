@@ -1,4 +1,4 @@
-package me.bestnuts.api.model.vehicle.component;
+package me.bestnuts.api.model.vehicle.component.bone;
 
 import me.bestnuts.api.manager.BoneType;
 import me.bestnuts.api.model.vehicle.data.BoneData;
