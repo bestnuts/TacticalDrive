@@ -24,7 +24,7 @@ public final class VehicleFactoryHook {
     }
 
     @Nullable
-    public static VehicleFactory getHooks(String name) {
+    public static VehicleFactory getHook(@NotNull String name) {
         return hook.get(name);
     }
 }

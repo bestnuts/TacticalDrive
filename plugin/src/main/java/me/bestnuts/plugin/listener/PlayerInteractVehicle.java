@@ -78,7 +78,7 @@ public class PlayerInteractVehicle implements Listener {
                 if (root == null) return;
                 String type = DataKeyHelper.get(root, DataKey.VEHICLE_ROOT_TYPE, String.class);
                 if (type == null) return;
-                VehicleFactory factory = VehicleFactoryHook.getHooks(type);
+                VehicleFactory factory = VehicleFactoryHook.getHook(type);
                 if (factory == null) return;
                 Vehicle vehicle = factory.regenerate(root);
                 if (vehicle == null) return;

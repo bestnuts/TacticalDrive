@@ -60,7 +60,7 @@ public final class TacticalDrive extends JavaPlugin {
                                     String type = ctx.get("type");
                                     String name = ctx.get("name");
 
-                                    VehicleFactory factory = VehicleFactoryHook.getHooks(type);
+                                    VehicleFactory factory = VehicleFactoryHook.getHook(type);
                                     if (factory == null) return;
                                     this.service.spawn(factory, new VehicleFactorySender(ctx.player().getLocation(), name));
                                 })
