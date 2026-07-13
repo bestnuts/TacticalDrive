@@ -75,6 +75,6 @@ public abstract class Vehicle {
     public abstract @NotNull String type();
 
     public void tick() {
-        boneByIdMap.values().forEach(bone -> bone.getFunctions().forEach(function -> function.execute(this)));
+        boneByIdMap.values().forEach(bone -> bone.getFunctions().forEach(function -> function.run(this)));
     }
 }
