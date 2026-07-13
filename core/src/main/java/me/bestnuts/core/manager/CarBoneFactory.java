@@ -1,10 +1,7 @@
 package me.bestnuts.core.manager;
 
 import me.bestnuts.api.bukkit.util.DataKeyHelper;
-import me.bestnuts.api.manager.BoneCreator;
-import me.bestnuts.api.manager.BoneCreatorHelper;
-import me.bestnuts.api.manager.BoneFactory;
-import me.bestnuts.api.manager.EntityFactory;
+import me.bestnuts.api.manager.*;
 import me.bestnuts.api.model.vehicle.component.bone.*;
 import me.bestnuts.api.model.vehicle.data.*;
 import me.bestnuts.core.model.vehicle.component.bone.ModelEntity;
@@ -26,8 +23,8 @@ public final class CarBoneFactory extends BoneFactory {
             VehicleSeat.class, SeatEntity::new
     ));
 
-    public CarBoneFactory(EntityFactory entityFactory) {
-        super(entityFactory);
+    public CarBoneFactory(@NotNull EntityFactory entityFactory, @NotNull FunctionFactory functionFactory) {
+        super(entityFactory, functionFactory);
     }
 
     @Override
@@ -44,7 +41,12 @@ public final class CarBoneFactory extends BoneFactory {
             BoneCreator creator = function.get(boneType);
             if (creator == null) continue;
             EntityFactorySender entityFactorySender = sender.withSection(boneSection);
-            VehicleBone bone = creator.create(getEntityFactory().generate(entityFactorySender), new BoneData(group, boneType, key));
+            ConfigurationSection tickSection = boneSection.getConfigurationSection("tick");
+            if (tickSection == null) continue;
+            BoneData boneData = new BoneData(group, (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(
+                    vehicleEntity, tickSection
+            )), boneType, key);
+            VehicleBone bone = creator.create(getEntityFactory().generate(entityFactorySender), boneData);
             bones.put(key, bone);
         }
         return bones;
@@ -65,7 +67,14 @@ public final class CarBoneFactory extends BoneFactory {
             BoneCreator creator = function.get(boneType);
             if (creator == null) continue;
             String name = DataKeyHelper.getOrDefault(entity, DataKey.VEHICLE_BONE_NAME, String.class, "");
-            VehicleBone bone = creator.create(entity, new BoneData(group, boneType, name));
+            ConfigurationSection boneSection = sender.section().getConfigurationSection(name);
+            if (boneSection == null) continue;
+            ConfigurationSection tickSection = boneSection.getConfigurationSection("tick");
+            if (tickSection == null) continue;
+            BoneData boneData = new BoneData(group, (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(
+                    vehicleEntity, tickSection
+            )), boneType, name);
+            VehicleBone bone = creator.create(entity, boneData);
             bones.put(name, bone);
             iterator.remove();
         }

@@ -4,15 +4,18 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import me.bestnuts.api.bukkit.register.PluginProvider;
 import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
+import me.bestnuts.api.bukkit.register.VehicleFunctionHook;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.core.manager.VehicleService;
+import me.bestnuts.core.model.vehicle.component.function.PositionFunction;
 import me.bestnuts.core.repository.GlobalRepository;
 import me.bestnuts.plugin.command.Arguments;
 import me.bestnuts.plugin.command.CommandNode;
 import me.bestnuts.plugin.command.Commands;
 import me.bestnuts.plugin.listener.PlayerInteractVehicle;
 import me.bestnuts.plugin.listener.PlayerLifecycle;
+import me.bestnuts.plugin.scheduler.GlobalScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +27,7 @@ public final class TacticalDrive extends JavaPlugin {
 
     private GlobalRepository repository;
     private VehicleService service;
+    private GlobalScheduler scheduler;
 
     @Override
     public void onEnable() {
@@ -31,15 +35,20 @@ public final class TacticalDrive extends JavaPlugin {
         repository = new GlobalRepository(this);
         service = new VehicleService(repository.getVehicleManager());
         register();
+        scheduler = new GlobalScheduler(this, repository);
     }
 
     @Override
     public void onDisable() {
+        scheduler.disable();
+        scheduler = null;
         service = null;
         repository = null;
     }
 
     private void register() {
+        VehicleFunctionHook.registerHook("position", PositionFunction::new);
+
         Bukkit.getPluginManager().registerEvents(new PlayerInteractVehicle(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository), this);
 

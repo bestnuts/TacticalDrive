@@ -2,6 +2,7 @@ package me.bestnuts.api.manager;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bestnuts.api.bukkit.util.DataKeyHelper;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleBone;
@@ -13,9 +14,11 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+@Slf4j
 @Getter
 @RequiredArgsConstructor
 public abstract class VehicleFactory implements Factory<VehicleFactorySender, Vehicle>, RestoreFactory<VehicleRestoreFactorySender, Vehicle> {
@@ -61,9 +64,15 @@ public abstract class VehicleFactory implements Factory<VehicleFactorySender, Ve
         String id = root.getUniqueId().toString();
         Predicate<Entity> filter = (nearBy) -> DataKeyHelper.getOrDefault(nearBy, DataKey.VEHICLE_ROOT_ID, String.class, "").equalsIgnoreCase(id);
         root.getChunk().load(false);
-        List<Entity> entities = root.getWorld().getNearbyEntities(root.getLocation(), 16, 16, 16, filter).stream().toList();
-        return regenerate(new VehicleRestoreFactorySender(root, entities));
+        List<Entity> entities = new ArrayList<>(root.getWorld().getNearbyEntities(root.getLocation(), 16, 16, 16, filter).stream().toList());
+        Vehicle vehicle = regenerate(new VehicleRestoreFactorySender(root, entities));
+        for (Entity entity : entities) {
+            sendRegenerateOmitEntityLog(entity);
+            entity.remove();
+        }
+        return vehicle;
     }
+
 
     private void applyDataKey(Vehicle vehicle) {
         String id = vehicle.entity().getUniqueId().toString();
@@ -80,5 +89,13 @@ public abstract class VehicleFactory implements Factory<VehicleFactorySender, Ve
         DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_TYPE, bone.getType());
         DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_NAME, bone.getName());
         DataKeyHelper.set(entity, DataKey.VEHICLE_BONE_GROUP, path);
+    }
+
+    private void sendRegenerateOmitEntityLog(Entity entity) {
+        String rootId = DataKeyHelper.getOrDefault(entity, DataKey.VEHICLE_ROOT_ID, String.class, "none");
+        String boneType = DataKeyHelper.getOrDefault(entity, DataKey.VEHICLE_BONE_TYPE, String.class, "none");
+        String boneName = DataKeyHelper.getOrDefault(entity, DataKey.VEHICLE_BONE_NAME, String.class, "none");
+        String boneGroup = DataKeyHelper.getOrDefault(entity, DataKey.VEHICLE_BONE_GROUP, String.class, "none");
+        log.warn("해당 본이 재생성 과정에서 누락되었습니다. rootId : {}, boneType : {}, boneName : {}, boneGroup : {}, originId : {}", rootId, boneType, boneName, boneGroup, entity.getUniqueId());
     }
 }

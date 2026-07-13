@@ -1,6 +1,11 @@
 package me.bestnuts.api.model.vehicle.data;
 
+import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
+import me.bestnuts.api.model.vehicle.component.function.VehicleFunction;
 
-public record BoneData(VehicleGroup group, String type, String name) {
+import java.util.List;
+import java.util.function.Function;
+
+public record BoneData(VehicleGroup group, Function<VehicleEntity, List<VehicleFunction>> function, String type, String name) {
 }

@@ -20,6 +20,6 @@ public final class VehicleCar extends Vehicle {
 
     @Override
     public void tick() {
-
+        super.tick();
     }
 }

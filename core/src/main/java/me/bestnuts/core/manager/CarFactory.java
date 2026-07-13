@@ -3,6 +3,7 @@ package me.bestnuts.core.manager;
 import me.bestnuts.api.manager.EntityFactory;
 import me.bestnuts.api.manager.GroupFactory;
 import me.bestnuts.api.manager.VehicleFactory;
+import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import me.bestnuts.core.model.vehicle.VehicleCar;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,6 @@ public final class CarFactory extends VehicleFactory {
 
     @Override
     public @NotNull String name() {
-        return "car";
+        return VehicleRegistryType.CAR.getName();
     }
 }

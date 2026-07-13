@@ -4,6 +4,7 @@ import me.bestnuts.api.manager.BoneFactory;
 import me.bestnuts.api.model.vehicle.data.BoneFactorySender;
 import me.bestnuts.api.model.vehicle.data.BoneRestoreFactorySender;
 import me.bestnuts.api.model.vehicle.data.EntityFactorySender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,10 +25,10 @@ public final class VehicleGroup {
         this.boneMap = sender == null ? Map.of() : boneFactory.generate(new BoneFactorySender(this, sender));
     }
 
-    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
+    public VehicleGroup(@Nullable VehicleGroup parent, @NotNull String name, @NotNull ConfigurationSection section, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
         this.parent = parent;
         this.name = name;
-        this.boneMap = boneFactory.regenerate(new BoneRestoreFactorySender(this, new ArrayList<>(entities)));
+        this.boneMap = boneFactory.regenerate(new BoneRestoreFactorySender(this, section, entities));
     }
 
     public VehicleGroup addChild(@NotNull String name, @Nullable EntityFactorySender sender, @NotNull BoneFactory boneFactory) {
@@ -36,8 +37,8 @@ public final class VehicleGroup {
         return child;
     }
 
-    public VehicleGroup addChild(@NotNull String name, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
-        VehicleGroup child = new VehicleGroup(this, name, entities, boneFactory);
+    public VehicleGroup addChild(@NotNull String name, @NotNull ConfigurationSection section, @NotNull List<Entity> entities, @NotNull BoneFactory boneFactory) {
+        VehicleGroup child = new VehicleGroup(this, name, section, entities, boneFactory);
         this.children.add(child);
         return child;
     }

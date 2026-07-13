@@ -61,13 +61,13 @@ public final class GroupFactory implements Factory<GroupFactorySender, VehicleGr
         return getGroup(new GroupImplConfiguration(configuration, section), sender.entities());
     }
 
-    public @NotNull VehicleGroup getGroup(@NotNull GroupImplConfiguration configuration, @NotNull List<Entity> entities) {
+    public @Nullable VehicleGroup getGroup(@NotNull GroupImplConfiguration configuration, @NotNull List<Entity> entities) {
         VehicleGroup rootGroup;
         String groupName = configuration.groupName();
         if (configuration.boneSection() == null) {
-            rootGroup = new VehicleGroup(null, groupName, entities, boneFactory);
+            return null;
         } else {
-            rootGroup = new VehicleGroup(null, groupName, entities, boneFactory);
+            rootGroup = new VehicleGroup(null, groupName, configuration.boneSection(), entities, boneFactory);
         }
 
         buildTree(rootGroup, configuration, entities);
@@ -76,7 +76,9 @@ public final class GroupFactory implements Factory<GroupFactorySender, VehicleGr
 
     private void buildTree(@NotNull VehicleGroup parentGroup, @NotNull GroupConfiguration parentConfig, @NotNull List<Entity> entities) {
         for (GroupConfiguration childConfig : parentConfig.children()) {
-            VehicleGroup childGroup = parentGroup.addChild(childConfig.groupName(), entities, boneFactory);
+            ConfigurationSection boneSection = childConfig.boneSection();
+            if (boneSection == null) continue;
+            VehicleGroup childGroup = parentGroup.addChild(childConfig.groupName(), boneSection, entities, boneFactory);
 
             buildTree(childGroup, childConfig, entities);
         }

@@ -17,7 +17,7 @@ public final class CarRepository {
     private final VehicleFactory carFactory;
 
     public CarRepository(SharedRepository shared, @NotNull File dir) {
-        GroupFactory groupFactory = new GroupFactory(new CarBoneFactory(shared.getEntityFactory()));
+        GroupFactory groupFactory = new GroupFactory(new CarBoneFactory(shared.getEntityFactory(), shared.getFunctionFactory()));
         CarConfigurationFactory configurationFactory = new CarConfigurationFactory(shared.getEntityFactory(), dir);
         carFactory = new CarFactory(shared.getEntityFactory(), groupFactory, configurationFactory);
         VehicleFactoryHook.registerHooks(carFactory);
