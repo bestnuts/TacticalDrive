@@ -9,7 +9,6 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Optional;
 
 public final class PositionFunction extends VehicleFunction {
 
@@ -21,20 +20,15 @@ public final class PositionFunction extends VehicleFunction {
 
     public PositionFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
-        this.world = FunctionParamHelper.getVector(param.get("world"), new Vector());
-        this.local = FunctionParamHelper.getVector(param.get("local"), new Vector());
+        this.world = FunctionParamHelper.getVector(param.getOrDefault("world", "0;0;0"), new Vector());
+        this.local = FunctionParamHelper.getVector(param.getOrDefault("local", "0;0;0"), new Vector());
         this.link = param.getOrDefault("link", "root");
     }
 
     @Override
     public void execute(@NotNull Vehicle vehicle) {
         if (pivot == null) {
-            Optional<? extends VehicleEntity> optional = vehicle.findBoneByPath(link);
-            if (optional.isEmpty()) {
-                pivot = vehicle.entity();
-            } else {
-                pivot = optional.get();
-            }
+            pivot = FunctionParamHelper.getLink(link, vehicle);
         }
         Location location = pivot.getLocation().clone();
         location.add(world);

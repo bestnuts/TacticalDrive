@@ -3,8 +3,10 @@ package me.bestnuts.core.model.entity;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.bestnuts.api.model.entity.Driver;
+import me.bestnuts.api.model.entity.component.InputProvider;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
+import me.bestnuts.core.model.entity.component.PlayerInputProvider;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -19,6 +21,7 @@ import java.util.UUID;
 public final class PlayerDriver implements Driver {
 
     private final Player player;
+    private final InputProvider input = new PlayerInputProvider();
 
     private Vehicle vehicle;
     private VehicleSeat seat;
@@ -26,6 +29,11 @@ public final class PlayerDriver implements Driver {
     @Override
     public @NotNull LivingEntity getEntity() {
         return player;
+    }
+
+    @Override
+    public @NotNull InputProvider getInput() {
+        return input;
     }
 
     @Override

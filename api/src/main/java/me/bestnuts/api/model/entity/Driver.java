@@ -1,5 +1,6 @@
 package me.bestnuts.api.model.entity;
 
+import me.bestnuts.api.model.entity.component.InputProvider;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
 import org.bukkit.Location;
@@ -12,22 +13,19 @@ import java.util.UUID;
 
 public interface Driver {
 
-    @NotNull
-    LivingEntity getEntity();
+    @NotNull LivingEntity getEntity();
 
-    @NotNull
-    Location getLocation();
+    @NotNull InputProvider getInput();
 
-    @NotNull
-    UUID getUniqueId();
+    @NotNull Location getLocation();
 
-    @NotNull
-    Optional<Vehicle> getSeatedVehicle();
+    @NotNull UUID getUniqueId();
+
+    @NotNull Optional<Vehicle> getSeatedVehicle();
 
     void setSeatedVehicle(@Nullable Vehicle vehicle);
 
-    @NotNull
-    Optional<VehicleSeat> getSeated();
+    @NotNull Optional<VehicleSeat> getSeated();
 
     void setSeatedVehicleSeat(@Nullable VehicleSeat seat);
 }
