@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 
 public final class FunctionFactory implements Factory<FunctionFactorySender, List<VehicleFunction>> {
 
-    private static final Pattern mainPattern = Pattern.compile("(\\w+):\\{(.+)}");
-    private static final Pattern pairPattern = Pattern.compile("(\\w+):([^,\\s]+)");
+    private static final Pattern mainPattern = Pattern.compile("([\\w-]+):\\{(.+)}");
+    private static final Pattern pairPattern = Pattern.compile("([\\w-]+):([^,\\s]+)");
 
     @Override
     public @NotNull List<VehicleFunction> generate(@NotNull FunctionFactorySender sender) {
