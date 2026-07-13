@@ -7,6 +7,8 @@ import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.core.model.vehicle.component.function.CarWheelFunction;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -78,5 +80,14 @@ public final class VehicleCar extends Vehicle {
         if (this.speed < 0.0) this.speed = 0.0;
 
         wheelOutputs.clear();
+
+        Location location = entity().getLocation();
+
+        entity().getEntity().setRotation((float) (location.getYaw() + steer * deltaTime), 0);
+
+        Vector direction = location.getDirection();
+        Vector movement = direction.multiply(speed);
+        movement.setY(0);
+        entity().getEntity().setVelocity(movement);
     }
 }

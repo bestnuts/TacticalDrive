@@ -21,7 +21,7 @@ public abstract class PhysicsConfiguration implements SharedConfiguration {
     public PhysicsConfiguration(@NotNull VehicleConfiguration parent, @NotNull FileConfiguration configuration) {
         this.parent = parent;
 
-        maxSpeed = configuration.getDouble("physics.max-speed", 200.0);
+        maxSpeed = configuration.getDouble("physics.max-speed", 20.0);
         horsePower = configuration.getDouble("physics.horse-power", 25.0);
 
         mass = configuration.getDouble("physics.mass", 500.0);

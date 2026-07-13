@@ -24,7 +24,7 @@ public class PlayerInput implements Listener {
         boolean isA = input.isLeft();
         boolean isD = input.isRight();
 
-        float sideway = isA && !isD ? 1 : !isA && isD ? -1 : 0;
+        float sideway = isA && !isD ? -1 : !isA && isD ? 1 : 0;
         float forward = isW && !isS ? 1 : !isW && isS ? -1 : 0;
         driverManager.find(event.getPlayer().getUniqueId()).ifPresent(
                 driver -> {

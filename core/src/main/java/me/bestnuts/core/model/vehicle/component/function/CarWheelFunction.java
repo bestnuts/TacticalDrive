@@ -8,6 +8,7 @@ import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
 import me.bestnuts.api.model.vehicle.component.function.VehicleFunction;
 import me.bestnuts.core.model.vehicle.VehicleCar;
 import me.bestnuts.core.model.vehicle.configuration.CarHandleConfiguration;
+import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -78,7 +79,9 @@ public final class CarWheelFunction extends VehicleFunction {
         }
 
         car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
-        getParent().getEntity().getLocation().addRotation((float) structuralSteer, (float) forwardForce);
+        Location location = getParent().getLocation();
+        location.setYaw((float) (location.getYaw() + structuralSteer * sideSign));
+        location.setPitch((float) (location.getPitch() + forwardForce));
     }
 
     public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) {
