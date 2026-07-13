@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public final class PlayerDriver implements Driver {
     }
 
     @Override
-    public void setSeatedVehicle(@NotNull Vehicle vehicle) {
+    public void setSeatedVehicle(@Nullable Vehicle vehicle) {
         this.vehicle = vehicle;
     }
 
@@ -53,7 +54,7 @@ public final class PlayerDriver implements Driver {
     }
 
     @Override
-    public void setSeatedVehicleSeat(@NotNull VehicleSeat seat) {
+    public void setSeatedVehicleSeat(@Nullable VehicleSeat seat) {
         this.seat = seat;
     }
 }
