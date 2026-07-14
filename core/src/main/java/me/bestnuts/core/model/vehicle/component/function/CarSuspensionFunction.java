@@ -79,6 +79,19 @@ public final class CarSuspensionFunction extends VehicleFunction {
         if (hit != null && hit.getHitBlock() != null) {
             double actualHitY = hit.getHitPosition().getY();
             double suspensionBaseY = suspensionTopLoc.getY();
+
+            double maxAllowedUpwardClimb = 0.6;
+            double minAllowedDownwardDrop = this.restLength * 1.2;
+
+            double maxHitY = suspensionBaseY + maxAllowedUpwardClimb;
+            double minHitY = suspensionBaseY - minAllowedDownwardDrop;
+
+            if (actualHitY > maxHitY) {
+                actualHitY = maxHitY;
+            } else if (actualHitY < minHitY) {
+                actualHitY = minHitY;
+            }
+
             currentLength = suspensionBaseY - actualHitY;
             groundY = actualHitY;
         }
@@ -104,7 +117,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
         Location finalWheelLocation = suspensionTopLoc.clone();
         finalWheelLocation.setY(wheelWorldY);
 
-        finalWheelLocation.setRotation(getParent().getLocation().getRotation());
+        finalWheelLocation.setRotation(getParent().getLocation().getYaw(), getParent().getLocation().getPitch());
         getParent().getEntity().teleport(finalWheelLocation);
     }
 
