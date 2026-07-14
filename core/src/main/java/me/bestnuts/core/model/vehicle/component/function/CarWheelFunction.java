@@ -80,8 +80,13 @@ public final class CarWheelFunction extends VehicleFunction {
 
         car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
         Location location = getParent().getLocation();
-        location.setYaw((float) (location.getYaw() + structuralSteer * sideSign));
-        location.setPitch((float) (location.getPitch() + forwardForce));
+        float wheelYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
+        location.setYaw(wheelYaw);
+
+        float wheelPitch = (float) (location.getPitch() + car.getSpeed() + forwardForce);
+        wheelPitch = (float) (((wheelPitch + 90.0) % 180.0 + 180.0) % 180.0) - 90.0f;
+        location.setPitch(wheelPitch);
+        getParent().getEntity().teleport(location);
     }
 
     public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) {

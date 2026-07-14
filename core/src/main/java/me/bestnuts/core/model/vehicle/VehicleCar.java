@@ -8,6 +8,9 @@ import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.core.model.vehicle.component.function.CarWheelFunction;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,11 +86,58 @@ public final class VehicleCar extends Vehicle {
 
         Location location = entity().getLocation();
 
-        entity().getEntity().setRotation((float) (location.getYaw() + steer * deltaTime), 0);
+        if (this.speed != 0.0) {
+            location.setRotation((float) (location.getYaw() + steer * deltaTime), 0);
+        }
+
 
         Vector direction = location.getDirection();
         Vector movement = direction.multiply(speed);
         movement.setY(0);
-        entity().getEntity().setVelocity(movement);
+        entity().getEntity().teleport(move(location, movement));
+    }
+
+    private Location move(Location location, Vector velocity) {
+        World world = location.getWorld();
+        if (world == null) return location;
+
+        double distance = velocity.length();
+        if (distance < 0.001) return location;
+
+        Vector direction = velocity.clone().normalize();
+
+        RayTraceResult rayResult = world.rayTraceBlocks(
+                location,
+                direction,
+                distance,
+                org.bukkit.FluidCollisionMode.NEVER,
+                true
+        );
+
+        Location targetLoc = location.clone().add(velocity);
+
+        if (rayResult == null || rayResult.getHitBlock() == null) {
+            return targetLoc;
+        }
+
+        Vector hitPoint = rayResult.getHitPosition();
+        BlockFace hitFace = rayResult.getHitBlockFace();
+
+        if (hitFace == null) return location;
+        Vector normal = hitFace.getDirection();
+
+        Vector safeHitPoint = hitPoint.clone().add(normal.clone().multiply(0.05));
+
+        Vector remainingMove = targetLoc.toVector().subtract(hitPoint);
+        double dotProduct = remainingMove.dot(normal);
+        Vector slidingVector = remainingMove.subtract(normal.multiply(dotProduct));
+
+        Vector finalVectorPosition = safeHitPoint.add(slidingVector);
+
+        Location correctedLoc = new Location(world, finalVectorPosition.getX(), finalVectorPosition.getY(), finalVectorPosition.getZ());
+        correctedLoc.setYaw(location.getYaw());
+        correctedLoc.setPitch(location.getPitch());
+
+        return correctedLoc;
     }
 }
