@@ -1,5 +1,6 @@
 package me.bestnuts.core.model.vehicle.component.function;
 
+import me.bestnuts.api.bukkit.util.Constant;
 import me.bestnuts.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.api.model.entity.Driver;
 import me.bestnuts.api.model.vehicle.Vehicle;
@@ -8,8 +9,11 @@ import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
 import me.bestnuts.api.model.vehicle.component.function.VehicleFunction;
 import me.bestnuts.core.model.vehicle.VehicleCar;
 import me.bestnuts.core.model.vehicle.configuration.CarHandleConfiguration;
-import org.bukkit.Location;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
 
 import java.util.Map;
 
@@ -24,6 +28,8 @@ public final class CarWheelFunction extends VehicleFunction {
     private VehicleSeat seat;
     private CarHandleConfiguration handleConfiguration;
     private boolean isLoad;
+
+    private double roll = 0.0;
 
     public CarWheelFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
@@ -79,14 +85,32 @@ public final class CarWheelFunction extends VehicleFunction {
         }
 
         car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
-        Location location = getParent().getLocation();
-        float wheelYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
-        location.setYaw(wheelYaw);
 
-        float wheelPitch = (float) (location.getPitch() + car.getSpeed() + forwardForce);
-        wheelPitch = (float) (((wheelPitch + 90.0) % 180.0 + 180.0) % 180.0) - 90.0f;
-        location.setPitch(wheelPitch);
-        getParent().getEntity().teleport(location);
+        this.roll += (car.getSpeed() * car.getSpeed() + forwardForce);
+        this.roll = (this.roll % 360.0 + 360.0) % 360.0;
+
+        float steerRad = (float) Math.toRadians(-structuralSteer);
+        float rollRad = (float) Math.toRadians(this.roll);
+        updateRotation(steerRad, rollRad);
+    }
+
+    private void updateRotation(float steer, float roll) {
+        Entity entity = getParent().getEntity();
+        if (!(entity instanceof Display display)) {
+            return;
+        }
+        Quaternionf steerYaw = new Quaternionf().rotationY(steer);
+        Quaternionf rollPitch = new Quaternionf().rotationX(roll);
+
+        Quaternionf finalRotation = steerYaw.mul(rollPitch);
+
+        Transformation transformation = display.getTransformation();
+
+        transformation.getLeftRotation().set(finalRotation);
+
+        display.setTransformation(transformation);
+        display.setInterpolationDuration(Constant.INTERPOLATION_TICK);
+        display.setInterpolationDelay(0);
     }
 
     public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) {

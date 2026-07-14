@@ -3,12 +3,21 @@ package me.bestnuts.api.bukkit.util;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 public final class FunctionParamHelper {
+
+    public static @NotNull NamespacedKey getNamespacedKey(@NotNull String input) {
+        String[] content = input.split(";");
+        if (content.length < 2) {
+            return new NamespacedKey(NamespacedKey.MINECRAFT_NAMESPACE, "");
+        }
+        return new NamespacedKey(content[0], content[1]);
+    }
 
     public static @NotNull Vector getVector(@NotNull String input, @NotNull Vector def) {
         String[] content = input.split(";");
@@ -33,7 +42,7 @@ public final class FunctionParamHelper {
         Vector right = forward.clone().crossProduct(up).normalize();
 
         Vector result = new Vector(0, 0, 0);
-        result.add(right.clone().multiply(local.getX()));
+        result.add(right.clone().multiply(-local.getX()));
         result.add(up.clone().multiply(local.getY()));
         result.add(forward.clone().multiply(local.getZ()));
 

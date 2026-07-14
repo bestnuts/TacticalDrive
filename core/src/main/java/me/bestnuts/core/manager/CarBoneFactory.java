@@ -42,10 +42,11 @@ public final class CarBoneFactory extends BoneFactory {
             if (creator == null) continue;
             EntityFactorySender entityFactorySender = sender.withSection(boneSection);
             ConfigurationSection tickSection = boneSection.getConfigurationSection("tick");
-            if (tickSection == null) continue;
-            BoneData boneData = new BoneData(group, (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(
-                    vehicleEntity, tickSection
-            )), boneType, key);
+            ConfigurationSection initSection = boneSection.getConfigurationSection("init");
+            BoneData boneData = new BoneData(group,
+                    (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(vehicleEntity, tickSection)),
+                    (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(vehicleEntity, initSection)),
+                    boneType, key);
             VehicleBone bone = creator.create(getEntityFactory().generate(entityFactorySender), boneData);
             bones.put(key, bone);
         }
@@ -70,10 +71,10 @@ public final class CarBoneFactory extends BoneFactory {
             ConfigurationSection boneSection = sender.section().getConfigurationSection(name);
             if (boneSection == null) continue;
             ConfigurationSection tickSection = boneSection.getConfigurationSection("tick");
-            if (tickSection == null) continue;
-            BoneData boneData = new BoneData(group, (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(
-                    vehicleEntity, tickSection
-            )), boneType, name);
+            ConfigurationSection initSection = boneSection.getConfigurationSection("init");
+            BoneData boneData = new BoneData(group,
+                    (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(vehicleEntity, tickSection)),
+                    (vehicleEntity) -> getFunctionFactory().generate(new FunctionFactorySender(vehicleEntity, initSection)), boneType, name);
             VehicleBone bone = creator.create(entity, boneData);
             bones.put(name, bone);
             iterator.remove();

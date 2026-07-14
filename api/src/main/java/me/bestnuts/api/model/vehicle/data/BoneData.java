@@ -7,5 +7,5 @@ import me.bestnuts.api.model.vehicle.component.function.VehicleFunction;
 import java.util.List;
 import java.util.function.Function;
 
-public record BoneData(VehicleGroup group, Function<VehicleEntity, List<VehicleFunction>> function, String type, String name) {
+public record BoneData(VehicleGroup group, Function<VehicleEntity, List<VehicleFunction>> tick, Function<VehicleEntity, List<VehicleFunction>> init, String type, String name) {
 }

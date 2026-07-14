@@ -24,6 +24,16 @@ public final class FunctionFactory implements Factory<FunctionFactorySender, Lis
     public @NotNull List<VehicleFunction> generate(@NotNull FunctionFactorySender sender) {
         List<VehicleFunction> functions = new ArrayList<>();
         ConfigurationSection section = sender.section();
+        if (section == null) return functions;
+
+        for (String input : section.getStringList("function")) {
+            VehicleFunction function = getFunction(sender.entity(), 0, input);
+            if (function == null) continue;
+            functions.add(function);
+        }
+
+        if (section.getName().equalsIgnoreCase("init")) return functions;
+
         for (String key : section.getKeys(false)) {
             int delay = Integer.parseInt(key);
             for (String input : section.getStringList(key)) {

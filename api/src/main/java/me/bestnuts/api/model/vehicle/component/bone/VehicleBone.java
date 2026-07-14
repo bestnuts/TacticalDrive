@@ -21,7 +21,8 @@ public abstract class VehicleBone extends VehicleEntity {
         this.group = data.group();
         this.type = data.type();
         this.name = data.name();
-        this.functions = data.function().apply(this);
+        this.functions = data.tick().apply(this);
+        data.init().apply(this);
     }
 
     public @NotNull String getAbsolutePath() {
