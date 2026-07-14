@@ -42,7 +42,7 @@ public final class CarWheelFunction extends VehicleFunction {
                 seat = target;
                 if (vehicle instanceof VehicleCar vehicleCar) {
                     car = vehicleCar;
-                    handleConfiguration = (CarHandleConfiguration) vehicleCar.configuration().getHandle();
+                    handleConfiguration = (CarHandleConfiguration) car.configuration().getHandle();
                     isLoad = true;
                 }
             }
@@ -63,7 +63,7 @@ public final class CarWheelFunction extends VehicleFunction {
         double structuralSteer = 0.0;
 
         if (this.steerable) {
-            structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax();
+            structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax() * handleConfiguration.getSteeringSensitivity();
         }
 
         double surfaceFriction = 1.0;

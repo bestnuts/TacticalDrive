@@ -8,6 +8,7 @@ import me.bestnuts.api.bukkit.register.VehicleFunctionHook;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.core.manager.VehicleService;
+import me.bestnuts.core.model.vehicle.component.function.CarSuspensionFunction;
 import me.bestnuts.core.model.vehicle.component.function.CarWheelFunction;
 import me.bestnuts.core.model.vehicle.component.function.PositionFunction;
 import me.bestnuts.core.model.vehicle.component.function.RotationFunction;
@@ -53,6 +54,7 @@ public final class TacticalDrive extends JavaPlugin {
         VehicleFunctionHook.registerHook("position", PositionFunction::new);
         VehicleFunctionHook.registerHook("rotation", RotationFunction::new);
         VehicleFunctionHook.registerHook("car-wheel", CarWheelFunction::new);
+        VehicleFunctionHook.registerHook("car-suspension", CarSuspensionFunction::new);
 
         Bukkit.getPluginManager().registerEvents(new PlayerInput(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerInteractVehicle(repository), this);

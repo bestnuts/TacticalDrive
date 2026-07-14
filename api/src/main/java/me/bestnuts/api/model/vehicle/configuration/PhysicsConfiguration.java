@@ -12,6 +12,7 @@ public abstract class PhysicsConfiguration implements SharedConfiguration {
     private final double maxSpeed;
     private final double horsePower;
 
+    private final double gravity;
     private final double mass;
     private final double dragCoefficient;
 
@@ -24,6 +25,7 @@ public abstract class PhysicsConfiguration implements SharedConfiguration {
         maxSpeed = configuration.getDouble("physics.max-speed", 20.0);
         horsePower = configuration.getDouble("physics.horse-power", 25.0);
 
+        gravity = configuration.getDouble("physics.gravity", 9.81);
         mass = configuration.getDouble("physics.mass", 500.0);
         dragCoefficient = configuration.getDouble("physics.drag-coefficient", 1.7);
 

@@ -6,6 +6,7 @@ import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
+import me.bestnuts.core.model.vehicle.component.function.CarSuspensionFunction;
 import me.bestnuts.core.model.vehicle.component.function.CarWheelFunction;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -17,15 +18,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.bestnuts.api.bukkit.util.Constant.FIXED_DELTA_TIME;
+
 @Getter
 public final class VehicleCar extends Vehicle {
 
-    private static final double deltaTime = 0.05;
-
     private double steer;
     private double speed;
+    private double verticalVelocity;
 
     private final List<CarWheelFunction.WheelOutput> wheelOutputs = new ArrayList<>();
+    private final List<CarSuspensionFunction.SuspensionOutput> suspensionOutputs = new ArrayList<>();
 
     public VehicleCar(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
         super(entity, group, configuration);
@@ -40,6 +43,16 @@ public final class VehicleCar extends Vehicle {
     public void tick() {
         super.tick();
 
+        Location location = updateValue();
+        wheelOutputs.clear();
+        suspensionOutputs.clear();
+        Vector direction = location.getDirection();
+        Vector movement = direction.multiply(speed);
+        entity().getEntity().teleport(updatePosition(location, movement));
+    }
+
+    private Location updateValue() {
+        //바퀴
         double combinedForwardForce = 0.0;
         double combinedLateralForce = 0.0;
         double combinedWheelSteer = 0.0;
@@ -58,7 +71,7 @@ public final class VehicleCar extends Vehicle {
 
         if (steerableWheelCount > 0) {
             double targetSteer = combinedWheelSteer / steerableWheelCount;
-            this.steer = this.steer + (targetSteer - this.steer) * 5.0 * deltaTime;
+            this.steer = this.steer + (targetSteer - this.steer) * 5.0 * FIXED_DELTA_TIME;
         }
 
         double totalEngineForce = combinedForwardForce * (configuration().getPhysics().getHorsePower() * 745.7) * 0.02;
@@ -73,31 +86,40 @@ public final class VehicleCar extends Vehicle {
         double netForce = totalEngineForce - totalResistance;
         double acceleration = netForce / mass;
 
-        this.speed += acceleration * deltaTime;
+        this.speed += acceleration * FIXED_DELTA_TIME;
 
         if (Math.abs(combinedLateralForce) > (mass * 0.4) && this.speed > 5.0) {
-            this.steer += (combinedLateralForce / mass) * 15.0 * deltaTime;
+            this.steer += (combinedLateralForce / mass) * 15.0 * FIXED_DELTA_TIME;
         }
 
         if (this.speed > maxSpeed) this.speed = maxSpeed;
         if (this.speed < 0.0) this.speed = 0.0;
 
-        wheelOutputs.clear();
-
         Location location = entity().getLocation();
 
         if (this.speed != 0.0) {
-            location.setRotation((float) (location.getYaw() + steer * deltaTime), 0);
+            location.setRotation((float) (location.getYaw() + steer), 0);
         }
 
+        //서스펜션
+        double totalSuspensionForce = 0.0;
+        for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
+            totalSuspensionForce += output.upwardForce();
+        }
 
-        Vector direction = location.getDirection();
-        Vector movement = direction.multiply(speed);
-        movement.setY(0);
-        entity().getEntity().teleport(move(location, movement));
+        double gravityForce = mass * configuration().getPhysics().getGravity();
+        double netVerticalForce = totalSuspensionForce - gravityForce;
+
+        double verticalAcceleration = netVerticalForce / mass;
+        this.verticalVelocity += verticalAcceleration * FIXED_DELTA_TIME;
+        double deltaY = this.verticalVelocity * FIXED_DELTA_TIME;
+
+        location.setY(location.getY() + deltaY);
+
+        return location;
     }
 
-    private Location move(Location location, Vector velocity) {
+    private Location updatePosition(Location location, Vector velocity) {
         World world = location.getWorld();
         if (world == null) return location;
 
