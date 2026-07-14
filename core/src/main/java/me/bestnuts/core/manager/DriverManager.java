@@ -4,10 +4,7 @@ import me.bestnuts.api.manager.Manager;
 import me.bestnuts.api.model.entity.Driver;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class DriverManager implements Manager<UUID, Driver> {
 
@@ -32,5 +29,9 @@ public final class DriverManager implements Manager<UUID, Driver> {
     public void register(Driver driver) {
         UUID id = driver.getUniqueId();
         idMap.put(id, driver);
+    }
+
+    public Collection<Driver> getAll() {
+        return idMap.values();
     }
 }

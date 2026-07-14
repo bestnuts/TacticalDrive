@@ -33,14 +33,7 @@ public final class PositionFunction extends VehicleFunction {
         Location location = pivot.getLocation().clone();
         location.add(world);
 
-        Vector forward = location.getDirection().normalize();
-        Vector up = new Vector(0, 1, 0);
-        Vector right = forward.clone().crossProduct(up).normalize();
-
-        Vector offset = new Vector(0, 0, 0);
-        offset.add(right.clone().multiply(-local.getX()));
-        offset.add(up.clone().multiply(local.getY()));
-        offset.add(forward.clone().multiply(local.getZ()));
+        Vector offset = FunctionParamHelper.rotateVectorByDirection(location, local);
 
         location.add(offset);
         location.setRotation(getParent().getLocation().getRotation());

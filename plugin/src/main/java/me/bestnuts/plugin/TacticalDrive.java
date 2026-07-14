@@ -16,7 +16,6 @@ import me.bestnuts.core.repository.GlobalRepository;
 import me.bestnuts.plugin.command.Arguments;
 import me.bestnuts.plugin.command.CommandNode;
 import me.bestnuts.plugin.command.Commands;
-import me.bestnuts.plugin.listener.PlayerInput;
 import me.bestnuts.plugin.listener.PlayerInteractVehicle;
 import me.bestnuts.plugin.listener.PlayerLifecycle;
 import me.bestnuts.plugin.scheduler.GlobalScheduler;
@@ -56,7 +55,6 @@ public final class TacticalDrive extends JavaPlugin {
         VehicleFunctionHook.registerHook("car-wheel", CarWheelFunction::new);
         VehicleFunctionHook.registerHook("car-suspension", CarSuspensionFunction::new);
 
-        Bukkit.getPluginManager().registerEvents(new PlayerInput(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerInteractVehicle(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository), this);
 

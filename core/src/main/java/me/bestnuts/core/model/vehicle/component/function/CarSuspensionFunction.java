@@ -16,13 +16,18 @@ import java.util.Map;
 
 import static me.bestnuts.api.bukkit.util.Constant.FIXED_DELTA_TIME;
 
-public class CarSuspensionFunction extends VehicleFunction {
+public final class CarSuspensionFunction extends VehicleFunction {
+
 
     private final double stiffness;
     private final double damping;
     private final double restLength;
-    private final Vector offset;
 
+    private final Vector world;
+    private final Vector local;
+    private final String link;
+
+    private VehicleEntity pivot;
     private VehicleCar car;
     private PhysicsConfiguration physicsConfiguration;
     private double previousCompression;
@@ -33,12 +38,18 @@ public class CarSuspensionFunction extends VehicleFunction {
         this.stiffness = Double.parseDouble(param.getOrDefault("stiffness", "12000.0"));
         this.damping = Double.parseDouble(param.getOrDefault("damping", "1800.0"));
         this.restLength = Double.parseDouble(param.getOrDefault("length", "1.2"));
-        this.offset = FunctionParamHelper.getVector(param.getOrDefault("offset", "0;0;0"), new Vector());
+
+        this.world = FunctionParamHelper.getVector(param.getOrDefault("world", "0;0;0"), new Vector());
+        this.local = FunctionParamHelper.getVector(param.getOrDefault("local", "0;0;0"), new Vector());
+        this.link = param.getOrDefault("link", "root");
     }
 
     @Override
     public void execute(@NotNull Vehicle vehicle) {
         if (!isLoad) {
+            if (pivot == null) {
+                pivot = FunctionParamHelper.getLink(link, vehicle);
+            }
             if (vehicle instanceof VehicleCar vehicleCar) {
                 car = vehicleCar;
                 physicsConfiguration = car.configuration().getPhysics();
@@ -46,21 +57,30 @@ public class CarSuspensionFunction extends VehicleFunction {
             }
             return;
         }
-        Location location = vehicle.entity().getLocation();
-        World world = location.getWorld();
 
-        Vector suspensionWorldPos = location.toVector().add(this.offset);
-        Location rayStart = new Location(world, suspensionWorldPos.getX(), suspensionWorldPos.getY(), suspensionWorldPos.getZ());
+        Location pivotLocation = pivot.getLocation().clone();
+        pivotLocation.add(this.world);
+
+        Vector rotatedLocal = FunctionParamHelper.rotateVectorByDirection(pivotLocation, this.local);
+        Location suspensionTopLoc = pivotLocation.clone().add(rotatedLocal);
+        World bukkitWorld = suspensionTopLoc.getWorld();
+
+        double checkHeightBuffer = 1.5;
+        Location rayStart = suspensionTopLoc.clone().add(0, checkHeightBuffer, 0);
 
         Vector downDirection = new Vector(0, -1, 0);
-        RayTraceResult hit = world.rayTraceBlocks(rayStart, downDirection, this.restLength, org.bukkit.FluidCollisionMode.NEVER, true);
+        double totalSearchDistance = this.restLength + checkHeightBuffer;
+
+        RayTraceResult hit = bukkitWorld.rayTraceBlocks(rayStart, downDirection, totalSearchDistance, org.bukkit.FluidCollisionMode.NEVER, true);
 
         double currentLength = this.restLength;
-        double groundY = rayStart.getY() - this.restLength;
+        double groundY = suspensionTopLoc.getY() - this.restLength;
 
         if (hit != null && hit.getHitBlock() != null) {
-            currentLength = rayStart.getY() - hit.getHitPosition().getY();
-            groundY = hit.getHitPosition().getY();
+            double actualHitY = hit.getHitPosition().getY();
+            double suspensionBaseY = suspensionTopLoc.getY();
+            currentLength = suspensionBaseY - actualHitY;
+            groundY = actualHitY;
         }
 
         double compression = this.restLength - currentLength;
@@ -75,15 +95,17 @@ public class CarSuspensionFunction extends VehicleFunction {
         double totalUpwardForce = springForce + dampingForce;
         if (totalUpwardForce < 0) totalUpwardForce = 0;
 
-        totalUpwardForce = Math.min(totalUpwardForce, (physicsConfiguration.getMass() * physicsConfiguration.getGravity()) * 5.0);
+        totalUpwardForce = Math.min(totalUpwardForce, (physicsConfiguration.getMass() * physicsConfiguration.getGravity()) * 2.2);
 
-        double wheelWorldY = (compression > 0) ? groundY : (rayStart.getY() - this.restLength);
+        double wheelWorldY = (compression > 0) ? groundY : (suspensionTopLoc.getY() - this.restLength);
 
         car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY));
 
-        Location originLocation = getParent().getLocation();
-        originLocation.setY(wheelWorldY);
-        getParent().getEntity().teleport(originLocation);
+        Location finalWheelLocation = suspensionTopLoc.clone();
+        finalWheelLocation.setY(wheelWorldY);
+
+        finalWheelLocation.setRotation(getParent().getLocation().getRotation());
+        getParent().getEntity().teleport(finalWheelLocation);
     }
 
     public record SuspensionOutput(double upwardForce, double wheelWorldY) {
