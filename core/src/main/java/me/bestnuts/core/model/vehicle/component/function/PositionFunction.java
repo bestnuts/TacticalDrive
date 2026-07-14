@@ -33,18 +33,17 @@ public final class PositionFunction extends VehicleFunction {
         Location location = pivot.getLocation().clone();
         location.add(world);
 
-        double yaw = Math.toRadians(location.getYaw());
-        double pitch = Math.toRadians(location.getPitch());
-        double cosY = Math.cos(yaw);
-        double sinY = Math.sin(yaw);
-        double cosP = Math.cos(pitch);
-        double sinP = Math.sin(pitch);
+        Vector forward = location.getDirection().normalize();
+        Vector up = new Vector(0, 1, 0);
+        Vector right = forward.clone().crossProduct(up).normalize();
 
-        double x = (local.getX() * cosY) + (local.getY() * sinY * sinP) + (local.getZ() * sinY * cosP);
-        double y = (local.getY() * cosP) - (local.getZ() * sinP);
-        double z = -((local.getX() * sinY) + (local.getY() * cosY * sinP) + (local.getZ() * cosY * cosP));
+        Vector offset = new Vector(0, 0, 0);
+        offset.add(right.clone().multiply(-local.getX()));
+        offset.add(up.clone().multiply(local.getY()));
+        offset.add(forward.clone().multiply(local.getZ()));
 
-        location.add(x, y, z);
+        location.add(offset);
+        location.setRotation(getParent().getLocation().getRotation());
         getParent().getEntity().teleport(location);
     }
 }
