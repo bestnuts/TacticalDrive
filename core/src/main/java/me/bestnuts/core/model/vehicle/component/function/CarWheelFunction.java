@@ -84,14 +84,15 @@ public final class CarWheelFunction extends VehicleFunction {
             lateralForce = centrifugalTarget * surfaceFriction * (1.0 + (this.sideSign * 0.1));
         }
 
-        car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
+        float steerYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
 
         if (rawThrottle < 0) {
             structuralSteer = -structuralSteer;
         }
-        float steerYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
 
-        this.roll += (car.getSpeed() * car.getSpeed() + forwardForce);
+        car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
+
+        this.roll += (car.getSpeed() * car.getSpeed()) * 128.0 * Math.signum(car.getSpeed());
         this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
@@ -111,8 +112,6 @@ public final class CarWheelFunction extends VehicleFunction {
         transformation.getLeftRotation().set(quaternionf);
 
         display.setTransformation(transformation);
-        display.setInterpolationDuration(Constant.INTERPOLATION_TICK);
-        display.setInterpolationDelay(Constant.INTERPOLATION_TICK);
     }
 
     public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) {

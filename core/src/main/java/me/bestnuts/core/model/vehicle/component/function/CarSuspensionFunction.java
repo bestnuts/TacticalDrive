@@ -19,7 +19,7 @@ import static me.bestnuts.api.bukkit.util.Constant.FIXED_DELTA_TIME;
 
 public final class CarSuspensionFunction extends VehicleFunction {
 
-
+    private final double height;
     private final double stiffness;
     private final double damping;
     private final double restLength;
@@ -36,6 +36,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
     public CarSuspensionFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
+        this.height = Double.parseDouble(param.getOrDefault("height", "0.5"));
         this.stiffness = Double.parseDouble(param.getOrDefault("stiffness", "12000.0"));
         this.damping = Double.parseDouble(param.getOrDefault("damping", "1800.0"));
         this.restLength = Double.parseDouble(param.getOrDefault("length", "1.2"));
@@ -118,7 +119,8 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         totalUpwardForce = Math.min(totalUpwardForce, (physicsConfiguration.getMass() * physicsConfiguration.getGravity()) * 2.2);
 
-        double wheelWorldY = (compression > 0) ? groundY : (suspensionTopLoc.getY() - this.restLength);
+        double wheelWorldY = (compression > 0) ? (groundY) : (suspensionTopLoc.getY() - this.restLength);
+        wheelWorldY = wheelWorldY + this.height;
 
         car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.local));
 
@@ -128,7 +130,6 @@ public final class CarSuspensionFunction extends VehicleFunction {
         finalWheelLocation.setRotation(getParent().getLocation().getYaw(), getParent().getLocation().getPitch());
         getParent().getEntity().teleport(finalWheelLocation);
     }
-
 
     public record SuspensionOutput(double upwardForce, double wheelWorldY, boolean lock, Vector offset) {
     }

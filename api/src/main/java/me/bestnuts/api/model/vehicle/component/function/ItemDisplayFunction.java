@@ -1,5 +1,6 @@
 package me.bestnuts.api.model.vehicle.component.function;
 
+import me.bestnuts.api.bukkit.util.Constant;
 import me.bestnuts.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
@@ -32,6 +33,10 @@ public final class ItemDisplayFunction extends VehicleFunction {
         Transformation transformation = display.getTransformation();
         transformation.getScale().set(size);
         display.setTransformation(transformation);
+
+        display.setInterpolationDuration(Constant.INTERPOLATION_TICK);
+        display.setInterpolationDelay(Constant.INTERPOLATION_TICK);
+        display.setTeleportDuration(Constant.INTERPOLATION_TICK);
     }
 
     @Override
