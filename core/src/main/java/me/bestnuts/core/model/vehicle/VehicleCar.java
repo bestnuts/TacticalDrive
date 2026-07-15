@@ -7,6 +7,7 @@ import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.api.model.vehicle.configuration.VehicleConfiguration;
+import me.bestnuts.core.model.vehicle.component.function.CarBodyFunction;
 import me.bestnuts.core.model.vehicle.component.function.CarSuspensionFunction;
 import me.bestnuts.core.model.vehicle.component.function.CarWheelFunction;
 import me.bestnuts.core.model.vehicle.configuration.CarPhysicsConfiguration;
@@ -30,6 +31,7 @@ public final class VehicleCar extends Vehicle {
 
     private final List<CarWheelFunction.WheelOutput> wheelOutputs = new ArrayList<>();
     private final List<CarSuspensionFunction.SuspensionOutput> suspensionOutputs = new ArrayList<>();
+    private final List<CarBodyFunction.BodyOutput> bodyOutputs = new ArrayList<>();
 
     public VehicleCar(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
         super(entity, group, configuration);
@@ -47,6 +49,7 @@ public final class VehicleCar extends Vehicle {
         Location location = updateValue();
         wheelOutputs.clear();
         suspensionOutputs.clear();
+        bodyOutputs.clear();
         Vector direction = location.getDirection();
         Vector movement = direction.multiply(speed);
         entity().getEntity().teleport(updatePosition(location, movement));
@@ -68,10 +71,22 @@ public final class VehicleCar extends Vehicle {
                 isSuspensionLocked = true;
                 Vector offset = output.offset();
                 accumulatedTorqueFactor += (offset.getX() * offset.getZ());
-
                 pushBackLocalVector.add(new Vector(-offset.getX(), 0, -offset.getZ()));
             }
         }
+
+        boolean isBodyLocked = false;
+        for (CarBodyFunction.BodyOutput output : bodyOutputs) {
+            if (output.lock()) {
+                isBodyLocked = true;
+                Vector offset = output.offset();
+                accumulatedTorqueFactor += (offset.getX() * offset.getZ());
+                pushBackLocalVector.add(new Vector(-offset.getX(), 0, -offset.getZ()));
+            }
+        }
+        bodyOutputs.clear();
+
+        boolean isAnyCollisionLocked = isSuspensionLocked || isBodyLocked;
 
         double deltaY = 0.0;
         if (activeSuspensionCount > 0) {
@@ -84,7 +99,7 @@ public final class VehicleCar extends Vehicle {
             if (targetVehicleY > currentY) {
                 newY = targetVehicleY;
             } else {
-                double smoothingFactor = isSuspensionLocked ? 40.0 : 15.0;
+                double smoothingFactor = isAnyCollisionLocked ? 40.0 : 15.0;
                 newY = currentY + (targetVehicleY - currentY) * smoothingFactor * FIXED_DELTA_TIME;
             }
 
@@ -162,7 +177,7 @@ public final class VehicleCar extends Vehicle {
 
         this.speed += acceleration * FIXED_DELTA_TIME;
 
-        if (isSuspensionLocked) {
+        if (isAnyCollisionLocked) {
             if ((this.speed > 0.0 && totalEngineForce > 0.0) || (this.speed < 0.0 && totalEngineForce < 0.0)) {
                 double torqueImpactFactor = 25.0;
                 double speedLossFactor = 0.4;
@@ -196,7 +211,7 @@ public final class VehicleCar extends Vehicle {
         Vector forwardVector = location.getDirection().setY(0).normalize();
         Vector horizontalVelocity = forwardVector.multiply(this.speed * FIXED_DELTA_TIME);
 
-        if (isSuspensionLocked && pushBackLocalVector.length() > 0.001) {
+        if (isAnyCollisionLocked && pushBackLocalVector.length() > 0.001) {
             Vector worldPushDirection = FunctionParamHelper.rotateVectorByDirection(location, pushBackLocalVector.normalize());
             double pushDistance = 0.15;
             horizontalVelocity.add(worldPushDirection.multiply(pushDistance));
@@ -206,7 +221,6 @@ public final class VehicleCar extends Vehicle {
 
         return updatePosition(location, combinedVelocity);
     }
-
 
 
     private Location updatePosition(Location location, Vector velocity) {

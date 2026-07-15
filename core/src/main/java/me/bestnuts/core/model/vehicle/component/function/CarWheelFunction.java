@@ -1,6 +1,5 @@
 package me.bestnuts.core.model.vehicle.component.function;
 
-import me.bestnuts.api.bukkit.util.Constant;
 import me.bestnuts.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.api.model.entity.Driver;
 import me.bestnuts.api.model.vehicle.Vehicle;
