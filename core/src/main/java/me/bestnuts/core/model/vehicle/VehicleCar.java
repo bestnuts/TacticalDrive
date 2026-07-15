@@ -1,6 +1,7 @@
 package me.bestnuts.core.model.vehicle;
 
 import lombok.Getter;
+import me.bestnuts.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleEntity;
@@ -52,7 +53,65 @@ public final class VehicleCar extends Vehicle {
     }
 
     private Location updateValue() {
-        //바퀴
+        Location location = entity().getLocation();
+
+        boolean isSuspensionLocked = false;
+        double totalWheelWorldY = 0.0;
+        int activeSuspensionCount = 0;
+        double accumulatedTorqueFactor = 0.0;
+        Vector pushBackLocalVector = new Vector(0, 0, 0);
+
+        for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
+            totalWheelWorldY += output.wheelWorldY();
+            activeSuspensionCount++;
+            if (output.lock()) {
+                isSuspensionLocked = true;
+                Vector offset = output.offset();
+                accumulatedTorqueFactor += (offset.getX() * offset.getZ());
+
+                pushBackLocalVector.add(new Vector(-offset.getX(), 0, -offset.getZ()));
+            }
+        }
+
+        double deltaY = 0.0;
+        if (activeSuspensionCount > 0) {
+            double averageGroundY = totalWheelWorldY / activeSuspensionCount;
+            double targetVehicleY = averageGroundY + ((CarPhysicsConfiguration) configuration().getPhysics()).getRestLength();
+
+            double currentY = location.getY();
+            double newY;
+
+            if (targetVehicleY > currentY) {
+                newY = targetVehicleY;
+            } else {
+                double smoothingFactor = isSuspensionLocked ? 40.0 : 15.0;
+                newY = currentY + (targetVehicleY - currentY) * smoothingFactor * FIXED_DELTA_TIME;
+            }
+
+            deltaY = newY - currentY;
+            if (Math.abs(deltaY) > 0.001) {
+                Vector yDirection = new Vector(0, deltaY > 0 ? 1 : -1, 0);
+                double yDistance = Math.abs(deltaY);
+
+                RayTraceResult yHit = location.getWorld().rayTraceBlocks(
+                        location,
+                        yDirection,
+                        yDistance,
+                        org.bukkit.FluidCollisionMode.NEVER,
+                        true
+                );
+
+                if (yHit != null && yHit.getHitBlock() != null) {
+                    double hitY = yHit.getHitPosition().getY();
+                    if (deltaY > 0) {
+                        deltaY = (hitY - 0.1) - currentY;
+                    } else {
+                        deltaY = (hitY + 0.05) - currentY;
+                    }
+                }
+            }
+        }
+
         double combinedForwardForce = 0.0;
         double combinedLateralForce = 0.0;
         double combinedWheelSteer = 0.0;
@@ -103,6 +162,24 @@ public final class VehicleCar extends Vehicle {
 
         this.speed += acceleration * FIXED_DELTA_TIME;
 
+        if (isSuspensionLocked) {
+            if ((this.speed > 0.0 && totalEngineForce > 0.0) || (this.speed < 0.0 && totalEngineForce < 0.0)) {
+                double torqueImpactFactor = 25.0;
+                double speedLossFactor = 0.4;
+
+                if (Math.abs(accumulatedTorqueFactor) < 0.01) {
+                    this.speed = 0.0;
+                } else {
+                    if (this.speed > 0.0) {
+                        this.steer += accumulatedTorqueFactor * torqueImpactFactor * FIXED_DELTA_TIME;
+                    } else {
+                        this.steer -= accumulatedTorqueFactor * torqueImpactFactor * FIXED_DELTA_TIME;
+                    }
+                    this.speed = this.speed * (1.0 - speedLossFactor);
+                }
+            }
+        }
+
         if (Math.abs(combinedLateralForce) > (mass * 0.4) && this.speed > 5.0) {
             this.steer += (combinedLateralForce / mass) * 1.5 * FIXED_DELTA_TIME;
         }
@@ -111,41 +188,38 @@ public final class VehicleCar extends Vehicle {
         if (Math.abs(this.speed) < 0.01) this.speed = 0.0;
         if (this.speed < -maxReverseSpeed) this.speed = -maxReverseSpeed;
 
-        Location location = entity().getLocation();
-
         if (this.speed != 0.0) {
-            location.setRotation((float) (location.getYaw() + steer), 0);
+            location.setRotation((float) (location.getYaw() + this.steer), 0);
+            this.steer = this.steer * FIXED_DELTA_TIME;
         }
 
-        //서스펜션
-        double totalWheelWorldY = 0.0;
-        int activeSuspensionCount = 0;
+        Vector forwardVector = location.getDirection().setY(0).normalize();
+        Vector horizontalVelocity = forwardVector.multiply(this.speed * FIXED_DELTA_TIME);
 
-        for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
-            totalWheelWorldY += output.wheelWorldY();
-            activeSuspensionCount++;
+        if (isSuspensionLocked && pushBackLocalVector.length() > 0.001) {
+            Vector worldPushDirection = FunctionParamHelper.rotateVectorByDirection(location, pushBackLocalVector.normalize());
+            double pushDistance = 0.15;
+            horizontalVelocity.add(worldPushDirection.multiply(pushDistance));
         }
 
-        if (activeSuspensionCount > 0) {
-            double averageGroundY = totalWheelWorldY / activeSuspensionCount;
-            double targetVehicleY = averageGroundY + ((CarPhysicsConfiguration) configuration().getPhysics()).getRestLength();
+        Vector combinedVelocity = horizontalVelocity.setY(deltaY);
 
-            double currentY = location.getY();
-            double smoothingFactor = 15.0;
-
-            double newY = currentY + (targetVehicleY - currentY) * smoothingFactor * FIXED_DELTA_TIME;
-            location.setY(newY);
-        }
-
-        return location;
+        return updatePosition(location, combinedVelocity);
     }
+
+
 
     private Location updatePosition(Location location, Vector velocity) {
         World world = location.getWorld();
         if (world == null) return location;
 
         double distance = velocity.length();
-        if (distance < 0.001) return location;
+        if (distance < 0.001) {
+            Location sameLoc = location.clone().add(velocity);
+            sameLoc.setYaw(location.getYaw());
+            sameLoc.setPitch(location.getPitch());
+            return sameLoc;
+        }
 
         Vector direction = velocity.clone().normalize();
 
@@ -160,13 +234,20 @@ public final class VehicleCar extends Vehicle {
         Location targetLoc = location.clone().add(velocity);
 
         if (rayResult == null || rayResult.getHitBlock() == null) {
+            targetLoc.setYaw(location.getYaw());
+            targetLoc.setPitch(location.getPitch());
             return targetLoc;
         }
 
         Vector hitPoint = rayResult.getHitPosition();
         BlockFace hitFace = rayResult.getHitBlockFace();
 
-        if (hitFace == null) return location;
+        if (hitFace == null) {
+            targetLoc.setYaw(location.getYaw());
+            targetLoc.setPitch(location.getPitch());
+            return targetLoc;
+        }
+
         Vector normal = hitFace.getDirection();
 
         Vector safeHitPoint = hitPoint.clone().add(normal.clone().multiply(0.05));
@@ -175,12 +256,29 @@ public final class VehicleCar extends Vehicle {
         double dotProduct = remainingMove.dot(normal);
         Vector slidingVector = remainingMove.subtract(normal.multiply(dotProduct));
 
+        double originalRemainingLength = remainingMove.length();
+        if (originalRemainingLength > 0.001) {
+            double slidingLength = slidingVector.length();
+            double lossRatio = 1.0 - (slidingLength / originalRemainingLength);
+
+            double wallFrictionFactor = 0.5;
+            double finalSpeedReduction = lossRatio * wallFrictionFactor;
+
+            this.speed = this.speed * (1.0 - finalSpeedReduction);
+        }
+
         Vector finalVectorPosition = safeHitPoint.add(slidingVector);
 
-        Location correctedLoc = new Location(world, finalVectorPosition.getX(), finalVectorPosition.getY(), finalVectorPosition.getZ());
+        Location correctedLoc = new Location(world, finalVectorPosition.getX(), targetLoc.getY(), finalVectorPosition.getZ());
+
+        if (normal.getY() > 0.5 || normal.getY() < -0.5) {
+            correctedLoc.setY(finalVectorPosition.getY());
+        }
+
         correctedLoc.setYaw(location.getYaw());
         correctedLoc.setPitch(location.getPitch());
 
         return correctedLoc;
     }
+
 }

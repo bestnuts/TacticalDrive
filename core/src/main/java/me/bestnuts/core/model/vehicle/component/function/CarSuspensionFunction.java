@@ -8,6 +8,7 @@ import me.bestnuts.api.model.vehicle.configuration.PhysicsConfiguration;
 import me.bestnuts.core.model.vehicle.VehicleCar;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -68,6 +69,12 @@ public final class CarSuspensionFunction extends VehicleFunction {
         double checkHeightBuffer = 1.5;
         Location rayStart = suspensionTopLoc.clone().add(0, checkHeightBuffer, 0);
 
+        Block startBlock = rayStart.getBlock();
+        if (startBlock.getType().isSolid()) {
+            car.getSuspensionOutputs().add(new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.local));
+            return;
+        }
+
         Vector downDirection = new Vector(0, -1, 0);
         double totalSearchDistance = this.restLength + checkHeightBuffer;
 
@@ -81,19 +88,20 @@ public final class CarSuspensionFunction extends VehicleFunction {
             double suspensionBaseY = suspensionTopLoc.getY();
 
             double maxAllowedUpwardClimb = 0.6;
-            double minAllowedDownwardDrop = this.restLength * 1.2;
-
             double maxHitY = suspensionBaseY + maxAllowedUpwardClimb;
-            double minHitY = suspensionBaseY - minAllowedDownwardDrop;
+            double minHitY = suspensionBaseY - (this.restLength * 1.15);
 
             if (actualHitY > maxHitY) {
                 actualHitY = maxHitY;
-            } else if (actualHitY < minHitY) {
-                actualHitY = minHitY;
             }
 
-            currentLength = suspensionBaseY - actualHitY;
-            groundY = actualHitY;
+            if (actualHitY >= minHitY) {
+                currentLength = suspensionBaseY - actualHitY;
+                groundY = actualHitY + 0.05;
+            } else {
+                currentLength = this.restLength;
+                groundY = suspensionBaseY - this.restLength;
+            }
         }
 
         double compression = this.restLength - currentLength;
@@ -112,7 +120,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         double wheelWorldY = (compression > 0) ? groundY : (suspensionTopLoc.getY() - this.restLength);
 
-        car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY));
+        car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.local));
 
         Location finalWheelLocation = suspensionTopLoc.clone();
         finalWheelLocation.setY(wheelWorldY);
@@ -121,6 +129,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
         getParent().getEntity().teleport(finalWheelLocation);
     }
 
-    public record SuspensionOutput(double upwardForce, double wheelWorldY) {
+
+    public record SuspensionOutput(double upwardForce, double wheelWorldY, boolean lock, Vector offset) {
     }
 }

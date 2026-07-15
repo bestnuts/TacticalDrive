@@ -21,6 +21,7 @@ import me.bestnuts.plugin.listener.PlayerInteractVehicle;
 import me.bestnuts.plugin.listener.PlayerLifecycle;
 import me.bestnuts.plugin.scheduler.GlobalScheduler;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -79,7 +80,9 @@ public final class TacticalDrive extends JavaPlugin {
 
                                     VehicleFactory factory = VehicleFactoryHook.getHook(type);
                                     if (factory == null) return;
-                                    this.service.spawn(factory, new VehicleFactorySender(ctx.player().getLocation(), name));
+                                    Location location = ctx.player().getLocation();
+                                    location.setPitch(0);
+                                    this.service.spawn(factory, new VehicleFactorySender(location, name));
                                 })
                 );
     }

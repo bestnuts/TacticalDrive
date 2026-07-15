@@ -86,31 +86,33 @@ public final class CarWheelFunction extends VehicleFunction {
 
         car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
 
-        this.roll += (car.getSpeed() * car.getSpeed() + forwardForce);
-        this.roll = (this.roll % 360.0 + 360.0) % 360.0;
+        if (rawThrottle < 0) {
+            structuralSteer = -structuralSteer;
+        }
+        float steerYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
 
-        float steerRad = (float) Math.toRadians(-structuralSteer);
+        this.roll += (car.getSpeed() * car.getSpeed() + forwardForce);
+        this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
-        updateRotation(steerRad, rollRad);
+
+        updateRotation(steerYaw, rollRad);
     }
 
-    private void updateRotation(float steer, float roll) {
+    private void updateRotation(float yaw, float roll) {
         Entity entity = getParent().getEntity();
+        entity.setRotation(yaw, 0);
         if (!(entity instanceof Display display)) {
             return;
         }
-        Quaternionf steerYaw = new Quaternionf().rotationY(steer);
-        Quaternionf rollPitch = new Quaternionf().rotationX(roll);
-
-        Quaternionf finalRotation = steerYaw.mul(rollPitch);
+        Quaternionf quaternionf = new Quaternionf().rotationX(roll);
 
         Transformation transformation = display.getTransformation();
 
-        transformation.getLeftRotation().set(finalRotation);
+        transformation.getLeftRotation().set(quaternionf);
 
         display.setTransformation(transformation);
         display.setInterpolationDuration(Constant.INTERPOLATION_TICK);
-        display.setInterpolationDelay(0);
+        display.setInterpolationDelay(Constant.INTERPOLATION_TICK);
     }
 
     public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) {
