@@ -2,11 +2,13 @@ package me.bestnuts.plugin;
 
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import me.bestnuts.api.bukkit.register.ManagerHook;
 import me.bestnuts.api.bukkit.register.PluginProvider;
 import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.api.bukkit.register.VehicleFunctionHook;
 import me.bestnuts.api.manager.VehicleFactory;
 import me.bestnuts.api.model.vehicle.component.function.DisplayTranslationFunction;
+import me.bestnuts.api.model.vehicle.component.function.InteractionSeatFunction;
 import me.bestnuts.api.model.vehicle.component.function.ItemDisplayFunction;
 import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.core.manager.VehicleService;
@@ -54,9 +56,13 @@ public final class TacticalDrive extends JavaPlugin {
         VehicleFunctionHook.registerHook("display-translation", DisplayTranslationFunction::new);
         VehicleFunctionHook.registerHook("position", PositionFunction::new);
         VehicleFunctionHook.registerHook("rotation", RotationFunction::new);
+        VehicleFunctionHook.registerHook("interaction-seat", InteractionSeatFunction::new);
         VehicleFunctionHook.registerHook("car-wheel", CarWheelFunction::new);
         VehicleFunctionHook.registerHook("car-suspension", CarSuspensionFunction::new);
         VehicleFunctionHook.registerHook("car-body", CarBodyFunction::new);
+
+        ManagerHook.register(repository.getVehicleManager());
+        ManagerHook.register(repository.getDriverManager());
 
         Bukkit.getPluginManager().registerEvents(new PlayerInteractVehicle(repository), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository), this);

@@ -120,34 +120,39 @@ public final class CarSuspensionFunction extends VehicleFunction {
         totalUpwardForce = Math.min(totalUpwardForce, (physicsConfiguration.getMass() * physicsConfiguration.getGravity()) * 2.2);
 
         double wheelWorldY = (compression > 0) ? (groundY) : (suspensionTopLoc.getY() - this.restLength);
-        wheelWorldY = wheelWorldY + this.height;
 
         car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.offset));
-        updateTranslation(pivotLocation, suspensionTopLoc, wheelWorldY);
+        updateTranslation(suspensionTopLoc, wheelWorldY);
     }
 
-    private void updateTranslation(Location pivotLocation, Location suspensionTopLoc, double wheelWorldY) {
+    private void updateTranslation(Location suspensionTopLoc, double wheelWorldY) {
         if (!(getParent().getEntity() instanceof Display display)) {
             return;
         }
 
-        Location currentPivot = pivot.getLocation().clone();
-        currentPivot.setRotation(getParent().getLocation().getYaw(), getParent().getLocation().getPitch());
-        display.teleport(currentPivot);
+        Location carLocation = pivot.getLocation();
+
+        double worldXDiff = suspensionTopLoc.getX() - carLocation.getX();
+        double worldZDiff = suspensionTopLoc.getZ() - carLocation.getZ();
+
+        double carYawRad = Math.toRadians(-carLocation.getYaw());
+        double cosYaw = Math.cos(carYawRad);
+        double sinYaw = Math.sin(carYawRad);
+
+        float localX = (float) (worldXDiff * cosYaw - worldZDiff * sinYaw);
+        float localZ = (float) (worldXDiff * sinYaw + worldZDiff * cosYaw);
 
         double localYTranslation = wheelWorldY - suspensionTopLoc.getY();
+        float localY = (float) (this.offset.getY() + localYTranslation + this.height);
 
         Transformation transformation = display.getTransformation();
         Vector3f translation = transformation.getTranslation();
 
-        translation.set(
-                (float) this.offset.getX(),
-                (float) (this.offset.getY() + localYTranslation),
-                (float) this.offset.getZ()
-        );
+        translation.set(localX, localY, localZ);
 
         display.setTransformation(transformation);
     }
+
 
     public record SuspensionOutput(double upwardForce, double wheelWorldY, boolean lock, Vector offset) {
     }

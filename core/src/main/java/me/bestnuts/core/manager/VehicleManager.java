@@ -1,6 +1,5 @@
 package me.bestnuts.core.manager;
 
-import me.bestnuts.api.manager.Manager;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.VehicleRegistryType;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +12,8 @@ public final class VehicleManager implements me.bestnuts.api.manager.VehicleMana
     private final Map<String, Map<UUID, Vehicle>> typeMap = new HashMap<>();
 
     @Override
-    public @NotNull Class<? extends Manager<?, ?>> type() {
-        return me.bestnuts.api.manager.VehicleManager.class;
+    public @NotNull String type() {
+        return "vehicle";
     }
 
     @Override

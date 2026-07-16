@@ -16,8 +16,5 @@ public final class SeatEntity extends VehicleSeat {
     @Override
     public void setDriver(@Nullable Driver driver) {
         super.setDriver(driver);
-        if (driver != null) {
-            getEntity().addPassenger(driver.getEntity());
-        }
     }
 }

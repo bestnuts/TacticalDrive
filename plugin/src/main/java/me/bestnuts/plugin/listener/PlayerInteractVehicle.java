@@ -7,7 +7,6 @@ import me.bestnuts.api.manager.VehicleManager;
 import me.bestnuts.api.model.entity.Driver;
 import me.bestnuts.api.model.vehicle.Vehicle;
 import me.bestnuts.api.model.vehicle.component.bone.VehicleBone;
-import me.bestnuts.api.model.vehicle.component.bone.VehicleSeat;
 import me.bestnuts.api.model.vehicle.data.DataKey;
 import me.bestnuts.core.manager.DriverManager;
 import me.bestnuts.core.repository.GlobalRepository;
@@ -38,12 +37,9 @@ public class PlayerInteractVehicle implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
         Entity entity = event.getDismounted();
         consumeVehicle(player, entity, (driver) -> driver.getSeated().isPresent(), (driver, vehicle) -> {
-            findBoneById(entity.getUniqueId(), vehicle, driver, (_driver, bone) -> {
-                if (!(bone instanceof VehicleSeat seat)) return;
-                seat.setDriver(null);
-                _driver.setSeatedVehicle(null);
-                _driver.setSeatedVehicleSeat(null);
-            });
+            driver.getSeated().ifPresent(seat -> seat.setDriver(null));
+            driver.setSeatedVehicle(null);
+            driver.setSeatedVehicleSeat(null);
         });
     }
 
@@ -52,12 +48,7 @@ public class PlayerInteractVehicle implements Listener {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
         consumeVehicle(player, entity, (driver) -> driver.getSeated().isEmpty(), (driver, vehicle) -> {
-            findBoneById(entity.getUniqueId(), vehicle, driver, (_driver, bone) -> {
-                if (!(bone instanceof VehicleSeat seat)) return;
-                seat.setDriver(_driver);
-                _driver.setSeatedVehicle(vehicle);
-                _driver.setSeatedVehicleSeat(seat);
-            });
+            DataKeyHelper.set(entity, DataKey.VEHICLE_INTERACT_ID, player.getUniqueId().toString());
         });
     }
 

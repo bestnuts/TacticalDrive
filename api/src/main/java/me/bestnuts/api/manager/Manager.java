@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface Manager<K, V> {
 
-    @NotNull Class<? extends Manager<?, ?>> type();
+    @NotNull String type();
 
     @NotNull Optional<V> find(K k);
 

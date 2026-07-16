@@ -1,18 +1,17 @@
 package me.bestnuts.core.manager;
 
-import me.bestnuts.api.manager.Manager;
 import me.bestnuts.api.model.entity.Driver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public final class DriverManager implements Manager<UUID, Driver> {
+public final class DriverManager implements me.bestnuts.api.manager.DriverManager {
 
     private final Map<UUID, Driver> idMap = new HashMap<>();
 
     @Override
-    public @NotNull Class<? extends Manager<?, ?>> type() {
-        return DriverManager.class;
+    public @NotNull String type() {
+        return "driver";
     }
 
     @Override
@@ -31,7 +30,7 @@ public final class DriverManager implements Manager<UUID, Driver> {
         idMap.put(id, driver);
     }
 
-    public Collection<Driver> getAll() {
+    public @NotNull Collection<Driver> getAll() {
         return idMap.values();
     }
 }
