@@ -9,9 +9,12 @@ import me.bestnuts.core.model.vehicle.VehicleCar;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Display;
 import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.Map;
 
@@ -24,8 +27,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private final double damping;
     private final double restLength;
 
-    private final Vector world;
-    private final Vector local;
+    private final Vector offset;
     private final String link;
 
     private VehicleEntity pivot;
@@ -41,8 +43,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
         this.damping = Double.parseDouble(param.getOrDefault("damping", "1800.0"));
         this.restLength = Double.parseDouble(param.getOrDefault("length", "1.2"));
 
-        this.world = FunctionParamHelper.getVector(param.getOrDefault("world", "0;0;0"), new Vector());
-        this.local = FunctionParamHelper.getVector(param.getOrDefault("local", "0;0;0"), new Vector());
+        this.offset = FunctionParamHelper.getVector(param.getOrDefault("offset", "0;0;0"), new Vector());
         this.link = param.getOrDefault("link", "root");
     }
 
@@ -61,9 +62,8 @@ public final class CarSuspensionFunction extends VehicleFunction {
         }
 
         Location pivotLocation = pivot.getLocation().clone();
-        pivotLocation.add(this.world);
 
-        Vector rotatedLocal = FunctionParamHelper.rotateVectorByDirection(pivotLocation, this.local);
+        Vector rotatedLocal = FunctionParamHelper.rotateVectorByDirection(pivotLocation, this.offset);
         Location suspensionTopLoc = pivotLocation.clone().add(rotatedLocal);
         World bukkitWorld = suspensionTopLoc.getWorld();
 
@@ -72,7 +72,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         Block startBlock = rayStart.getBlock();
         if (startBlock.getType().isSolid()) {
-            car.getSuspensionOutputs().add(new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.local));
+            car.getSuspensionOutputs().add(new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.offset));
             return;
         }
 
@@ -122,13 +122,31 @@ public final class CarSuspensionFunction extends VehicleFunction {
         double wheelWorldY = (compression > 0) ? (groundY) : (suspensionTopLoc.getY() - this.restLength);
         wheelWorldY = wheelWorldY + this.height;
 
-        car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.local));
+        car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.offset));
+        updateTranslation(pivotLocation, suspensionTopLoc, wheelWorldY);
+    }
 
-        Location finalWheelLocation = suspensionTopLoc.clone();
-        finalWheelLocation.setY(wheelWorldY);
+    private void updateTranslation(Location pivotLocation, Location suspensionTopLoc, double wheelWorldY) {
+        if (!(getParent().getEntity() instanceof Display display)) {
+            return;
+        }
 
-        finalWheelLocation.setRotation(getParent().getLocation().getYaw(), getParent().getLocation().getPitch());
-        getParent().getEntity().teleport(finalWheelLocation);
+        Location currentPivot = pivot.getLocation().clone();
+        currentPivot.setRotation(getParent().getLocation().getYaw(), getParent().getLocation().getPitch());
+        display.teleport(currentPivot);
+
+        double localYTranslation = wheelWorldY - suspensionTopLoc.getY();
+
+        Transformation transformation = display.getTransformation();
+        Vector3f translation = transformation.getTranslation();
+
+        translation.set(
+                (float) this.offset.getX(),
+                (float) (this.offset.getY() + localYTranslation),
+                (float) this.offset.getZ()
+        );
+
+        display.setTransformation(transformation);
     }
 
     public record SuspensionOutput(double upwardForce, double wheelWorldY, boolean lock, Vector offset) {

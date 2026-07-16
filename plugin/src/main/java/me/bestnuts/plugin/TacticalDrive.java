@@ -6,6 +6,7 @@ import me.bestnuts.api.bukkit.register.PluginProvider;
 import me.bestnuts.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.api.bukkit.register.VehicleFunctionHook;
 import me.bestnuts.api.manager.VehicleFactory;
+import me.bestnuts.api.model.vehicle.component.function.DisplayTranslationFunction;
 import me.bestnuts.api.model.vehicle.component.function.ItemDisplayFunction;
 import me.bestnuts.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.core.manager.VehicleService;
@@ -50,6 +51,7 @@ public final class TacticalDrive extends JavaPlugin {
 
     private void register() {
         VehicleFunctionHook.registerHook("item-display", ItemDisplayFunction::new);
+        VehicleFunctionHook.registerHook("display-translation", DisplayTranslationFunction::new);
         VehicleFunctionHook.registerHook("position", PositionFunction::new);
         VehicleFunctionHook.registerHook("rotation", RotationFunction::new);
         VehicleFunctionHook.registerHook("car-wheel", CarWheelFunction::new);

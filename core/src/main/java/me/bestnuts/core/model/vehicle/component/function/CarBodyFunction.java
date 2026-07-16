@@ -113,8 +113,6 @@ public final class CarBodyFunction extends HitboxFunction {
         transformation.getLeftRotation().set(finalRotation);
 
         display.setTransformation(transformation);
-        display.setInterpolationDuration(1);
-        display.setInterpolationDelay(0);
     }
 
     public record BodyOutput(boolean lock, Vector offset) {
