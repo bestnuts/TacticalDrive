@@ -71,7 +71,7 @@ public final class CarWheelFunction extends VehicleFunction {
             structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax() * handleConfiguration.getSteeringSensitivity();
         }
 
-        double surfaceFriction = 1.0;
+        double surfaceFriction = 1.0 * handleConfiguration.getWheelFriction();
 
         if (this.driven && Math.abs(rawThrottle) > 0.01) {
             double slipRatio = (car.getSpeed() < 3.0) ? 0.7 : 0.1;
@@ -85,7 +85,7 @@ public final class CarWheelFunction extends VehicleFunction {
 
         float steerYaw = (float) (car.entity().getLocation().getYaw() + structuralSteer);
 
-        if (rawThrottle < 0) {
+        if (car.getSpeed() < 0) {
             structuralSteer = -structuralSteer;
         }
 
