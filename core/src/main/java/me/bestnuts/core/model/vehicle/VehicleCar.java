@@ -28,6 +28,8 @@ public final class VehicleCar extends Vehicle {
 
     private double steer;
     private double speed;
+    private double pitch;
+    private double roll;
 
     private final List<CarWheelFunction.WheelOutput> wheelOutputs = new ArrayList<>();
     private final List<CarSuspensionFunction.SuspensionOutput> suspensionOutputs = new ArrayList<>();
@@ -64,12 +66,22 @@ public final class VehicleCar extends Vehicle {
         double accumulatedTorqueFactor = 0.0;
         Vector pushBackLocalVector = new Vector(0, 0, 0);
 
+        double frontLeftY = 0.0, frontRightY = 0.0;
+        double rearLeftY = 0.0, rearRightY = 0.0;
+        int flCount = 0, frCount = 0, rlCount = 0, rrCount = 0;
+
         for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
             totalWheelWorldY += output.wheelWorldY();
             activeSuspensionCount++;
+
+            Vector offset = output.offset();
+            if (offset.getZ() > 0 && offset.getX() < 0) { frontLeftY += output.wheelWorldY(); flCount++; }
+            else if (offset.getZ() > 0 && offset.getX() > 0) { frontRightY += output.wheelWorldY(); frCount++; }
+            else if (offset.getZ() < 0 && offset.getX() < 0) { rearLeftY += output.wheelWorldY(); rlCount++; }
+            else if (offset.getZ() < 0 && offset.getX() > 0) { rearRightY += output.wheelWorldY(); rrCount++; }
+
             if (output.lock()) {
                 isSuspensionLocked = true;
-                Vector offset = output.offset();
                 accumulatedTorqueFactor += (offset.getX() * offset.getZ());
                 pushBackLocalVector.add(new Vector(-offset.getX(), 0, -offset.getZ()));
             }
@@ -87,6 +99,47 @@ public final class VehicleCar extends Vehicle {
         bodyOutputs.clear();
 
         boolean isAnyCollisionLocked = isSuspensionLocked || isBodyLocked;
+
+        if (flCount > 0 && frCount > 0 && rlCount > 0 && rrCount > 0) {
+            double avgFrontY = (frontLeftY / flCount + frontRightY / frCount) * 0.5;
+            double avgRearY = (rearLeftY / rlCount + rearRightY / rrCount) * 0.5;
+            double avgLeftY = (frontLeftY / flCount + rearLeftY / rlCount) * 0.5;
+            double avgRightY = (frontRightY / frCount + rearRightY / rrCount) * 0.5;
+
+            double totalLengthOffset = 0.0;
+            double totalWidthOffset = 0.0;
+            int lengthSampleCount = 0;
+            int widthSampleCount = 0;
+
+            for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
+                Vector offset = output.offset();
+                for (CarSuspensionFunction.SuspensionOutput innerOutput : suspensionOutputs) {
+                    Vector innerOffset = innerOutput.offset();
+
+                    double deltaZ = offset.getZ() - innerOffset.getZ();
+                    if (deltaZ > 0.1) {
+                        totalLengthOffset += deltaZ;
+                        lengthSampleCount++;
+                    }
+
+                    double deltaX = offset.getX() - innerOffset.getX();
+                    if (deltaX > 0.1) {
+                        totalWidthOffset += deltaX;
+                        widthSampleCount++;
+                    }
+                }
+            }
+
+            double carLength = lengthSampleCount > 0 ? (totalLengthOffset / lengthSampleCount) : 2.5;
+            double carWidth = widthSampleCount > 0 ? (totalWidthOffset / widthSampleCount) : 1.6;
+
+            double targetPitch = Math.toDegrees(Math.atan2(avgFrontY - avgRearY, carLength));
+            double targetRoll = Math.toDegrees(Math.atan2(avgLeftY - avgRightY, carWidth));
+
+            this.pitch = this.pitch + (targetPitch - this.pitch) * 10.0 * FIXED_DELTA_TIME;
+            this.roll = this.roll + (targetRoll - this.roll) * 10.0 * FIXED_DELTA_TIME;
+        }
+
 
         double deltaY = 0.0;
         if (activeSuspensionCount > 0) {

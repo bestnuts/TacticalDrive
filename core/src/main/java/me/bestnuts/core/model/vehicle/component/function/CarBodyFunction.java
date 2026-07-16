@@ -8,8 +8,12 @@ import me.bestnuts.core.model.vehicle.VehicleCar;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
 
 import java.util.Map;
 
@@ -31,6 +35,8 @@ public final class CarBodyFunction extends HitboxFunction {
             }
             return;
         }
+
+        updateRotation((float) car.getPitch(), (float) car.getRoll());
 
         Location bodyLocation = vehicle.entity().getLocation();
         World world = bodyLocation.getWorld();
@@ -88,6 +94,27 @@ public final class CarBodyFunction extends HitboxFunction {
         if (isBodyCollided) {
             car.getBodyOutputs().add(new BodyOutput(true, bodyCollisionOffset));
         }
+    }
+
+    private void updateRotation(float pitch, float roll) {
+        Entity entity = getParent().getEntity();
+        if (!(entity instanceof Display display)) {
+            return;
+        }
+
+        float pitchRad = (float) Math.toRadians(-pitch);
+        float rollRad = (float) Math.toRadians(-roll);
+
+        Quaternionf pitchQuaternion = new Quaternionf().rotationX(pitchRad);
+        Quaternionf rollQuaternion = new Quaternionf().rotationZ(rollRad);
+        Quaternionf finalRotation = pitchQuaternion.mul(rollQuaternion);
+
+        Transformation transformation = display.getTransformation();
+        transformation.getLeftRotation().set(finalRotation);
+
+        display.setTransformation(transformation);
+        display.setInterpolationDuration(1);
+        display.setInterpolationDelay(0);
     }
 
     public record BodyOutput(boolean lock, Vector offset) {

@@ -91,7 +91,7 @@ public final class CarWheelFunction extends VehicleFunction {
 
         car.getWheelOutputs().add(new WheelOutput(forwardForce, lateralForce, structuralSteer));
 
-        this.roll += (car.getSpeed() * car.getSpeed()) * 128.0 * Math.signum(car.getSpeed());
+        this.roll += (car.getSpeed() * car.getSpeed()) * 256.0 * Math.signum(car.getSpeed());
         this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
