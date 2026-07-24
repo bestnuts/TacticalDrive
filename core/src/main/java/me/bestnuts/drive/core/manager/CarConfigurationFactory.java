@@ -7,7 +7,7 @@ import me.bestnuts.drive.api.model.vehicle.configuration.FuelConfiguration;
 import me.bestnuts.drive.api.model.vehicle.configuration.HandleConfiguration;
 import me.bestnuts.drive.api.model.vehicle.configuration.PhysicsConfiguration;
 import me.bestnuts.drive.api.model.vehicle.data.ConfigurationFactorySender;
-import me.bestnuts.core.model.vehicle.configuration.*;
+import me.bestnuts.drive.core.model.vehicle.configuration.*;
 import me.bestnuts.drive.core.model.vehicle.configuration.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
