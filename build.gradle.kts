@@ -31,7 +31,7 @@ bukkitPluginYaml {
     val versionProperty = findProperty("version") as? String
         ?: throw IllegalArgumentException("version was null")
 
-    main = "me.bestnuts.plugin.TacticalDrive"
+    main = "me.bestnuts.drive.plugin.TacticalDrive"
     name = rootProject.name
     version = versionProperty
     apiVersion = "1.21"
