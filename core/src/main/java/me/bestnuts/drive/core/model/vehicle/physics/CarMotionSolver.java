@@ -53,13 +53,14 @@ public final class CarMotionSolver {
                                    @NotNull List<WheelOutput> wheels,
                                    @NotNull List<SuspensionOutput> suspensions,
                                    @NotNull List<BodyOutput> bodies) {
+        ChassisSize chassis = measureChassis(suspensions);
         CollisionState collision = resolveCollision(suspensions, bodies);
-        updateBodyAngles(motion, suspensions);
+        updateBodyAngles(motion, suspensions, chassis);
         double deltaY = resolveVerticalMotion(location, motion, suspensions);
         updateSteer(motion, wheels);
         integrateSpeed(motion, wheels, suspensions, collision);
 
-        Location moved = move(location, resolveVelocity(location, motion, collision), motion);
+        Location moved = move(location, resolveVelocity(location, motion, collision, chassis), motion);
         return moved.add(0, deltaY, 0);
     }
 
@@ -87,7 +88,7 @@ public final class CarMotionSolver {
         return new CollisionState(locked, torqueFactor, pushBack);
     }
 
-    private void updateBodyAngles(@NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions) {
+    private void updateBodyAngles(@NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions, @NotNull ChassisSize chassis) {
         double frontLeftY = 0.0, frontRightY = 0.0;
         double rearLeftY = 0.0, rearRightY = 0.0;
         int flCount = 0, frCount = 0, rlCount = 0, rrCount = 0;
@@ -101,19 +102,22 @@ public final class CarMotionSolver {
             else if (offset.getZ() < 0 && offset.getX() > 0) { rearRightY += output.wheelWorldY(); rrCount++; }
         }
 
-        if (flCount == 0 || frCount == 0 || rlCount == 0 || rrCount == 0) return;
+        double smoothing = physics.getBodyAngleSmoothing() * FIXED_DELTA_TIME;
+
+        if (flCount == 0 || frCount == 0 || rlCount == 0 || rrCount == 0) {
+            motion.setPitch(motion.getPitch() * (1.0 - smoothing));
+            motion.setRoll(motion.getRoll() * (1.0 - smoothing));
+            return;
+        }
 
         double avgFrontY = (frontLeftY / flCount + frontRightY / frCount) * 0.5;
         double avgRearY = (rearLeftY / rlCount + rearRightY / rrCount) * 0.5;
         double avgLeftY = (frontLeftY / flCount + rearLeftY / rlCount) * 0.5;
         double avgRightY = (frontRightY / frCount + rearRightY / rrCount) * 0.5;
 
-        ChassisSize chassis = measureChassis(suspensions);
-
         double targetPitch = Math.toDegrees(Math.atan2(avgFrontY - avgRearY, chassis.length()));
         double targetRoll = Math.toDegrees(Math.atan2(avgLeftY - avgRightY, chassis.width()));
 
-        double smoothing = physics.getBodyAngleSmoothing() * FIXED_DELTA_TIME;
         motion.setPitch(motion.getPitch() + (targetPitch - motion.getPitch()) * smoothing);
         motion.setRoll(motion.getRoll() + (targetRoll - motion.getRoll()) * smoothing);
     }
@@ -185,15 +189,11 @@ public final class CarMotionSolver {
     }
 
     private void updateSteer(@NotNull VehicleMotion motion, @NotNull List<WheelOutput> wheels) {
-        if (motion.getSpeed() == 0.0) {
-            motion.setSteer(0.0);
-        }
-
         double combinedWheelSteer = 0.0;
         int steerableWheelCount = 0;
 
         for (WheelOutput output : wheels) {
-            if (output.wheelSteer() == 0.0) continue;
+            if (!output.steerable()) continue;
             combinedWheelSteer += output.wheelSteer();
             steerableWheelCount++;
         }
@@ -260,10 +260,11 @@ public final class CarMotionSolver {
         return 1.0;
     }
 
-    private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion, @NotNull CollisionState collision) {
+    private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion,
+                                            @NotNull CollisionState collision, @NotNull ChassisSize chassis) {
         if (motion.getSpeed() != 0.0) {
-            location.setRotation((float) (location.getYaw() + motion.getSteer()), 0);
-            motion.setSteer(motion.getSteer() * FIXED_DELTA_TIME);
+            double yawRate = (motion.getSpeed() / chassis.length()) * Math.tan(Math.toRadians(motion.getSteer()));
+            location.setRotation((float) (location.getYaw() + Math.toDegrees(yawRate) * FIXED_DELTA_TIME), 0);
         }
 
         Vector forwardVector = location.getDirection().setY(0).normalize();

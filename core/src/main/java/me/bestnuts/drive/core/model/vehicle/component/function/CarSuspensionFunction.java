@@ -71,12 +71,12 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         if (probe != null && probe.hitY() > anchorY + physics.getMaxStepHeight()) {
             leaveGround();
-            return wall(anchorY);
+            return droop(anchor, true);
         }
 
         if (probe == null || probe.hitY() < anchorY - restLength) {
             leaveGround();
-            return airborne(anchor, anchorY - restLength);
+            return droop(anchor, false);
         }
 
         double compression = restLength - (anchorY - probe.hitY());
@@ -132,15 +132,11 @@ public final class CarSuspensionFunction extends VehicleFunction {
         return Math.min(total, limit);
     }
 
-    private @NotNull SuspensionOutput wall(double anchorY) {
-        return new SuspensionOutput(getParent().getUniqueId(), 0.0, anchorY - restLength,
-                false, true, frictionRegistry.getDefaultFriction(), this.offset);
-    }
-
-    private @NotNull SuspensionOutput airborne(@NotNull Location anchor, double wheelWorldY) {
+    private @NotNull SuspensionOutput droop(@NotNull Location anchor, boolean wall) {
+        double wheelWorldY = anchor.getY() - restLength;
         updateTranslation(anchor, wheelWorldY);
         return new SuspensionOutput(getParent().getUniqueId(), 0.0, wheelWorldY,
-                false, false, frictionRegistry.getDefaultFriction(), this.offset);
+                false, wall, frictionRegistry.getDefaultFriction(), this.offset);
     }
 
     private void updateTranslation(@NotNull Location anchor, double wheelWorldY) {

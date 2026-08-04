@@ -21,6 +21,10 @@ import java.util.Map;
 
 public final class CarWheelFunction extends VehicleFunction {
 
+    private static final double THROTTLE_EPSILON = 0.01;
+    private static final double SPEED_EPSILON = 0.01;
+    private static final double TRACTION_SPEED = 3.0;
+
     private final boolean steerable;
     private final boolean driven;
     private final double sideSign;
@@ -60,15 +64,24 @@ public final class CarWheelFunction extends VehicleFunction {
         double lateralForce = 0.0;
         double structuralSteer = 0.0;
 
+        double speed = vehicle.motion().getSpeed();
+
         if (this.steerable) {
-            structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax() * handleConfiguration.getSteeringSensitivity();
+            double speedFactor = 1.0 / (1.0 + Math.abs(speed) * handleConfiguration.getSteerSpeedFalloff());
+            structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax()
+                    * handleConfiguration.getSteeringSensitivity() * speedFactor;
         }
 
         double tireFriction = handleConfiguration.getWheelFriction();
 
-        if (this.driven && Math.abs(rawThrottle) > 0.01) {
-            double slipRatio = (vehicle.motion().getSpeed() < 3.0) ? 0.7 : 0.1;
-            forwardForce = rawThrottle * tireFriction * (1.0 - slipRatio);
+        if (this.driven && Math.abs(rawThrottle) > THROTTLE_EPSILON) {
+            boolean braking = Math.abs(speed) > SPEED_EPSILON && rawThrottle * speed < 0;
+            if (braking) {
+                forwardForce = rawThrottle * tireFriction * handleConfiguration.getBrakeForce();
+            } else {
+                double slipRatio = (Math.abs(speed) < TRACTION_SPEED) ? 0.7 : 0.1;
+                forwardForce = rawThrottle * tireFriction * (1.0 - slipRatio);
+            }
         }
 
         if (Math.abs(vehicle.motion().getSteer()) > 0.1) {
@@ -77,19 +90,14 @@ public final class CarWheelFunction extends VehicleFunction {
         }
 
         float carYaw = vehicle.entity().getLocation().getYaw();
-        double visualSteer = structuralSteer;
 
-        if (vehicle.motion().getSpeed() < 0) {
-            structuralSteer = -structuralSteer;
-        }
-
-        this.roll += (vehicle.motion().getSpeed() * vehicle.motion().getSpeed()) * 256.0 * Math.signum(vehicle.motion().getSpeed());
+        this.roll += (speed * speed) * 256.0 * Math.signum(speed);
         this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
-        updateRotation(vehicle, carYaw, visualSteer, rollRad);
+        updateRotation(vehicle, carYaw, structuralSteer, rollRad);
 
-        return new WheelOutput(getParent().getUniqueId(), forwardForce, lateralForce, structuralSteer);
+        return new WheelOutput(getParent().getUniqueId(), this.steerable, forwardForce, lateralForce, structuralSteer);
     }
 
     private void updateRotation(@NotNull Vehicle vehicle, float carYaw, double steer, float spin) {
