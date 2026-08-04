@@ -43,6 +43,12 @@ public final class VehicleManager implements AbstractVehicleManager {
     }
 
     @Override
+    public void clear() {
+        idMap.clear();
+        typeMap.clear();
+    }
+
+    @Override
     public @NotNull Collection<Vehicle> getByType(VehicleRegistryType type) {
         Map<UUID, Vehicle> subMap = typeMap.get(type.getName());
         return subMap != null ? Collections.unmodifiableCollection(subMap.values()) : Collections.emptyList();

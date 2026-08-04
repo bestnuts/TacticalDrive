@@ -1,35 +1,26 @@
 package me.bestnuts.drive.plugin.listener;
 
-import me.bestnuts.drive.api.model.entity.Driver;
-import me.bestnuts.drive.core.manager.DriverManager;
-import me.bestnuts.drive.core.model.entity.PlayerDriver;
-import me.bestnuts.drive.core.repository.GlobalRepository;
-import org.bukkit.entity.Player;
+import me.bestnuts.drive.core.service.DriverService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.UUID;
-
 public class PlayerLifecycle implements Listener {
 
-    private final DriverManager driverManager;
+    private final DriverService driverService;
 
-    public PlayerLifecycle(GlobalRepository repository) {
-        this.driverManager = repository.getDriverManager();
+    public PlayerLifecycle(DriverService driverService) {
+        this.driverService = driverService;
     }
 
     @EventHandler
     public void join(PlayerJoinEvent event) {
-        Driver driver = new PlayerDriver(event.getPlayer());
-        driverManager.register(driver);
+        driverService.join(event.getPlayer());
     }
 
     @EventHandler
     public void quit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        UUID id = player.getUniqueId();
-        driverManager.unregister(id);
+        driverService.quit(event.getPlayer());
     }
 }

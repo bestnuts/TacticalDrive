@@ -31,6 +31,12 @@ public final class DriverManager implements AbstractDriverManager {
         idMap.put(id, driver);
     }
 
+    @Override
+    public void clear() {
+        idMap.clear();
+    }
+
+    @Override
     public @NotNull Collection<Driver> getAll() {
         return idMap.values();
     }

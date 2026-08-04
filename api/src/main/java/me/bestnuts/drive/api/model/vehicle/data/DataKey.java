@@ -1,8 +1,8 @@
 package me.bestnuts.drive.api.model.vehicle.data;
 
-import me.bestnuts.drive.api.bukkit.register.PluginProvider;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 public enum DataKey {
 
@@ -21,8 +21,7 @@ public enum DataKey {
         this.key = key;
     }
 
-    static {
-        JavaPlugin plugin = PluginProvider.getPlugin();
+    public static void initialize(@NotNull JavaPlugin plugin) {
         for (DataKey value : values()) {
             value.namespacedKey = new NamespacedKey(plugin, value.key);
         }

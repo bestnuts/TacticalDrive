@@ -1,9 +1,9 @@
 package me.bestnuts.drive.plugin.scheduler;
 
+import me.bestnuts.drive.api.manager.AbstractDriverManager;
 import me.bestnuts.drive.api.manager.AbstractVehicleManager;
 import me.bestnuts.drive.api.model.entity.Driver;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
-import me.bestnuts.drive.core.manager.DriverManager;
 import me.bestnuts.drive.core.repository.GlobalRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.Input;
@@ -17,7 +17,7 @@ public final class GlobalScheduler {
 
     private final BukkitTask tickTask;
     private final AbstractVehicleManager vehicleManager;
-    private final DriverManager driverManager;
+    private final AbstractDriverManager driverManager;
 
     public GlobalScheduler(JavaPlugin plugin, GlobalRepository repository) {
         this.vehicleManager = repository.getVehicleManager();

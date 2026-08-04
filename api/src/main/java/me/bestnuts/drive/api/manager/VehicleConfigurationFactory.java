@@ -1,6 +1,5 @@
 package me.bestnuts.drive.api.manager;
 
-import lombok.Getter;
 import me.bestnuts.drive.api.model.vehicle.configuration.SharedConfiguration;
 import me.bestnuts.drive.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.drive.api.model.vehicle.data.ConfigurationFactorySender;
@@ -20,13 +19,6 @@ public abstract class VehicleConfigurationFactory implements ConfigurationFactor
     }
 
     private final Map<Class<?>, ConfigCreator> function = new HashMap<>();
-
-    @Getter
-    private final EntityFactory entityFactory;
-
-    public VehicleConfigurationFactory(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
-    }
 
     @Override
     public abstract @NotNull VehicleConfiguration generate(@NotNull ConfigurationFactorySender sender);

@@ -1,9 +1,10 @@
-package me.bestnuts.drive.api.model.vehicle.component.function;
+package me.bestnuts.drive.core.model.vehicle.component.function;
 
 import me.bestnuts.drive.api.bukkit.util.Constant;
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
+import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;

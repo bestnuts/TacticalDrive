@@ -1,4 +1,4 @@
-package me.bestnuts.drive.core.manager;
+package me.bestnuts.drive.core.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bestnuts.drive.api.manager.VehicleFactory;
@@ -7,7 +7,7 @@ import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleFactorySender;
 
 @RequiredArgsConstructor
-public final class VehicleService {
+public final class VehicleSpawnService {
 
     private final AbstractVehicleManager manager;
 

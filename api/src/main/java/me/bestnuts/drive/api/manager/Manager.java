@@ -13,4 +13,6 @@ public interface Manager<K, V> {
     void unregister(K k);
 
     void register(V v);
+
+    void clear();
 }
