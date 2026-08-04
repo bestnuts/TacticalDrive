@@ -154,10 +154,13 @@ public final class CarMotionSolver {
 
     private double resolveVerticalMotion(@NotNull Location location, @NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions) {
         double totalUpwardForce = 0.0;
+        double climbLimitY = Double.NEGATIVE_INFINITY;
         for (SuspensionOutput output : suspensions) {
+            climbLimitY = Math.max(climbLimitY, output.climbLimitY());
             if (!output.grounded()) continue;
             totalUpwardForce += output.upwardForce();
         }
+        motion.setClimbLimitY(climbLimitY);
 
         double acceleration = (totalUpwardForce / physics.getMass()) - physics.getGravity();
         double verticalVelocity = motion.getVerticalVelocity() + acceleration * FIXED_DELTA_TIME;

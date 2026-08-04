@@ -12,4 +12,5 @@ public final class VehicleMotion {
     private double pitch;
     private double roll;
     private double verticalVelocity;
+    private double climbLimitY = Double.NEGATIVE_INFINITY;
 }

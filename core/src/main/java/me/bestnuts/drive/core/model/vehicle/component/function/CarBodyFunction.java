@@ -46,18 +46,25 @@ public final class CarBodyFunction extends HitboxFunction {
 
         VehicleHitbox expandedBox = getHitbox().calculateExpandedBox(searchVelocity);
 
-        int minX = (int) Math.floor(expandedBox.getMin().getX());
-        int minY = (int) Math.floor(expandedBox.getMin().getY());
-        int minZ = (int) Math.floor(expandedBox.getMin().getZ());
-        int maxX = (int) Math.ceil(expandedBox.getMax().getX());
-        int maxY = (int) Math.ceil(expandedBox.getMax().getY());
-        int maxZ = (int) Math.ceil(expandedBox.getMax().getZ());
+        Vector boxMin = expandedBox.getMin();
+        Vector boxMax = expandedBox.getMax();
+        double climbLimitY = vehicle.motion().getClimbLimitY();
+
+        int minX = (int) Math.floor(boxMin.getX());
+        int minY = (int) Math.floor(boxMin.getY());
+        int minZ = (int) Math.floor(boxMin.getZ());
+        int maxX = (int) Math.ceil(boxMax.getX());
+        int maxY = (int) Math.ceil(boxMax.getY());
+        int maxZ = (int) Math.ceil(boxMax.getZ());
 
         boolean isBodyCollided = false;
         Vector bodyCollisionOffset = new Vector(0, 0, 0);
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
+                if (y + 1 <= climbLimitY) {
+                    continue;
+                }
                 for (int z = minZ; z <= maxZ; z++) {
                     Block block = world.getBlockAt(x, y, z);
 
@@ -65,12 +72,9 @@ public final class CarBodyFunction extends HitboxFunction {
                         continue;
                     }
 
-                    Vector blockMin = new Vector(x, y, z);
-                    Vector blockMax = new Vector(x + 1, y + 1, z + 1);
-
-                    if (expandedBox.getMin().getX() <= blockMax.getX() && expandedBox.getMax().getX() >= blockMin.getX() &&
-                            expandedBox.getMin().getY() <= blockMax.getY() && expandedBox.getMax().getY() >= blockMin.getY() &&
-                            expandedBox.getMin().getZ() <= blockMax.getZ() && expandedBox.getMax().getZ() >= blockMin.getZ()) {
+                    if (boxMin.getX() <= x + 1 && boxMax.getX() >= x &&
+                            boxMin.getY() <= y + 1 && boxMax.getY() >= y &&
+                            boxMin.getZ() <= z + 1 && boxMax.getZ() >= z) {
 
                         isBodyCollided = true;
 

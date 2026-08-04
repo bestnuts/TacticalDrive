@@ -43,6 +43,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private VehicleEntity pivot;
     private CarPhysicsConfiguration physics;
     private double previousCompression;
+    private double climbLimitY;
     private boolean wasGrounded;
 
     public CarSuspensionFunction(@NotNull SurfaceFrictionRegistry frictionRegistry,
@@ -68,8 +69,9 @@ public final class CarSuspensionFunction extends VehicleFunction {
         Location anchor = resolveAnchor(vehicle.motion());
         GroundProbe probe = probeGround(anchor);
         double anchorY = anchor.getY();
+        this.climbLimitY = anchorY + physics.getMaxStepHeight();
 
-        if (probe != null && probe.hitY() > anchorY + physics.getMaxStepHeight()) {
+        if (probe != null && probe.hitY() > this.climbLimitY) {
             leaveGround();
             return droop(anchor, true);
         }
@@ -90,7 +92,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
         double force = springForce(compression);
         updateTranslation(anchor, wheelWorldY);
 
-        return new SuspensionOutput(getParent().getUniqueId(), force, wheelWorldY,
+        return new SuspensionOutput(getParent().getUniqueId(), force, wheelWorldY, this.climbLimitY,
                 true, false, frictionRegistry.find(probe.material()), this.offset);
     }
 
@@ -135,7 +137,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private @NotNull SuspensionOutput droop(@NotNull Location anchor, boolean wall) {
         double wheelWorldY = anchor.getY() - restLength;
         updateTranslation(anchor, wheelWorldY);
-        return new SuspensionOutput(getParent().getUniqueId(), 0.0, wheelWorldY,
+        return new SuspensionOutput(getParent().getUniqueId(), 0.0, wheelWorldY, this.climbLimitY,
                 false, wall, frictionRegistry.getDefaultFriction(), this.offset);
     }
 
