@@ -43,6 +43,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private VehicleEntity pivot;
     private CarPhysicsConfiguration physics;
     private double previousCompression;
+    private boolean wasGrounded;
 
     public CarSuspensionFunction(@NotNull SurfaceFrictionRegistry frictionRegistry,
                                  @NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
@@ -69,19 +70,24 @@ public final class CarSuspensionFunction extends VehicleFunction {
         double anchorY = anchor.getY();
 
         if (probe != null && probe.hitY() > anchorY + physics.getMaxStepHeight()) {
-            previousCompression = 0.0;
+            leaveGround();
             return wall(anchorY);
         }
 
         if (probe == null || probe.hitY() < anchorY - restLength) {
-            previousCompression = 0.0;
+            leaveGround();
             return airborne(anchor, anchorY - restLength);
         }
 
         double compression = restLength - (anchorY - probe.hitY());
         double wheelWorldY = probe.hitY() + GROUND_INSET;
 
-        double force = springForce(compression, vehicle.motion());
+        if (!wasGrounded) {
+            previousCompression = compression;
+            wasGrounded = true;
+        }
+
+        double force = springForce(compression);
         updateTranslation(anchor, wheelWorldY);
 
         return new SuspensionOutput(getParent().getUniqueId(), force, wheelWorldY,
@@ -107,7 +113,12 @@ public final class CarSuspensionFunction extends VehicleFunction {
         return new GroundProbe(hit.getHitPosition().getY(), hit.getHitBlock().getType());
     }
 
-    private double springForce(double compression, @NotNull VehicleMotion motion) {
+    private void leaveGround() {
+        previousCompression = 0.0;
+        wasGrounded = false;
+    }
+
+    private double springForce(double compression) {
         double springForce = compression * this.stiffness;
 
         double compressionVelocity = (compression - this.previousCompression) / FIXED_DELTA_TIME;

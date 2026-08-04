@@ -59,8 +59,8 @@ public final class CarMotionSolver {
         updateSteer(motion, wheels);
         integrateSpeed(motion, wheels, suspensions, collision);
 
-        Location moved = move(location, resolveVelocity(location, motion, deltaY, collision), motion);
-        return move(moved, moved.getDirection().multiply(motion.getSpeed()), motion);
+        Location moved = move(location, resolveVelocity(location, motion, collision), motion);
+        return moved.add(0, deltaY, 0);
     }
 
     private @NotNull CollisionState resolveCollision(@NotNull List<SuspensionOutput> suspensions, @NotNull List<BodyOutput> bodies) {
@@ -260,7 +260,7 @@ public final class CarMotionSolver {
         return 1.0;
     }
 
-    private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion, double deltaY, @NotNull CollisionState collision) {
+    private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion, @NotNull CollisionState collision) {
         if (motion.getSpeed() != 0.0) {
             location.setRotation((float) (location.getYaw() + motion.getSteer()), 0);
             motion.setSteer(motion.getSteer() * FIXED_DELTA_TIME);
@@ -274,7 +274,7 @@ public final class CarMotionSolver {
             horizontalVelocity.add(worldPushDirection.multiply(physics.getCollisionPushDistance()));
         }
 
-        return horizontalVelocity.setY(deltaY);
+        return horizontalVelocity.setY(0);
     }
 
     private @NotNull Location move(@NotNull Location location, @NotNull Vector velocity, @NotNull VehicleMotion motion) {
