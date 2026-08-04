@@ -94,7 +94,6 @@ public final class CarMotionSolver {
         int flCount = 0, frCount = 0, rlCount = 0, rrCount = 0;
 
         for (SuspensionOutput output : suspensions) {
-            if (!output.grounded()) continue;
             Vector offset = output.offset();
             if (offset.getZ() > 0 && offset.getX() < 0) { frontLeftY += output.wheelWorldY(); flCount++; }
             else if (offset.getZ() > 0 && offset.getX() > 0) { frontRightY += output.wheelWorldY(); frCount++; }
