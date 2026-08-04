@@ -13,6 +13,7 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +26,7 @@ public final class ItemDisplayFunction extends VehicleFunction {
         Material material = Material.getMaterial(param.getOrDefault("material", "AIR"));
         material = material == null ? Material.AIR : material;
         NamespacedKey model = FunctionParamHelper.getNamespacedKey(param.getOrDefault("model", "minecraft;air"));
-        float size = Float.parseFloat(param.getOrDefault("size", "1"));
+        Vector size = FunctionParamHelper.getVector(param.getOrDefault("size", "1;1;1"), new Vector(1, 1, 1));
         Entity entity = parent.getEntity();
         if (!(entity instanceof ItemDisplay display)) return;
         ItemStack itemStack = ItemStack.of(material);
@@ -34,7 +35,7 @@ public final class ItemDisplayFunction extends VehicleFunction {
         itemStack.setItemMeta(itemMeta);
         display.setItemStack(itemStack);
         Transformation transformation = display.getTransformation();
-        transformation.getScale().set(size);
+        transformation.getScale().set((float) size.getX(), (float) size.getY(), (float) size.getZ());
         display.setTransformation(transformation);
 
         display.setInterpolationDuration(Constant.INTERPOLATION_TICK);

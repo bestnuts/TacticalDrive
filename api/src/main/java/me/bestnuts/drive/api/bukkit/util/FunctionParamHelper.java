@@ -20,10 +20,14 @@ public final class FunctionParamHelper {
 
     public static @NotNull Vector getVector(@NotNull String input, @NotNull Vector def) {
         String[] content = input.split(";");
-         if (content.length < 3) {
-             return def;
-         }
-         return new Vector(Double.parseDouble(content[0]), Double.parseDouble(content[1]), Double.parseDouble(content[2]));
+        if (content.length == 1) {
+            double uniform = Double.parseDouble(content[0]);
+            return new Vector(uniform, uniform, uniform);
+        }
+        if (content.length < 3) {
+            return def;
+        }
+        return new Vector(Double.parseDouble(content[0]), Double.parseDouble(content[1]), Double.parseDouble(content[2]));
     }
 
     public static @NotNull VehicleEntity getLink(@NotNull String path, @NotNull Vehicle vehicle) {
