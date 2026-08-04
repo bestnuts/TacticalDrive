@@ -27,7 +27,7 @@ public final class CarBodyFunction extends HitboxFunction {
 
     @Override
     public @Nullable VehicleOutput execute(@NotNull Vehicle vehicle) {
-        updateRotation((float) vehicle.getPitch(), (float) vehicle.getRoll());
+        updateRotation((float) vehicle.motion().getPitch(), (float) vehicle.motion().getRoll());
 
         Location bodyLocation = vehicle.entity().getLocation();
         World world = bodyLocation.getWorld();
@@ -35,7 +35,7 @@ public final class CarBodyFunction extends HitboxFunction {
 
         getHitbox().update(bodyLocation);
 
-        double carSpeed = vehicle.getSpeed();
+        double carSpeed = vehicle.motion().getSpeed();
         Vector forwardVector = bodyLocation.getDirection().setY(0).normalize();
 
         double currentMoveDistance = carSpeed * 0.05;

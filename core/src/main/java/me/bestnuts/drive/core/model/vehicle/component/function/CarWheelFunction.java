@@ -66,22 +66,22 @@ public final class CarWheelFunction extends VehicleFunction {
         double surfaceFriction = 1.0 * handleConfiguration.getWheelFriction();
 
         if (this.driven && Math.abs(rawThrottle) > 0.01) {
-            double slipRatio = (vehicle.getSpeed() < 3.0) ? 0.7 : 0.1;
+            double slipRatio = (vehicle.motion().getSpeed() < 3.0) ? 0.7 : 0.1;
             forwardForce = rawThrottle * surfaceFriction * (1.0 - slipRatio);
         }
 
-        if (Math.abs(vehicle.getSteer()) > 0.1) {
-            double centrifugalTarget = Math.sin(Math.toRadians(vehicle.getSteer())) * vehicle.getSpeed();
+        if (Math.abs(vehicle.motion().getSteer()) > 0.1) {
+            double centrifugalTarget = Math.sin(Math.toRadians(vehicle.motion().getSteer())) * vehicle.motion().getSpeed();
             lateralForce = centrifugalTarget * surfaceFriction * (1.0 + (this.sideSign * 0.1));
         }
 
         float steerYaw = (float) (vehicle.entity().getLocation().getYaw() + structuralSteer);
 
-        if (vehicle.getSpeed() < 0) {
+        if (vehicle.motion().getSpeed() < 0) {
             structuralSteer = -structuralSteer;
         }
 
-        this.roll += (vehicle.getSpeed() * vehicle.getSpeed()) * 256.0 * Math.signum(vehicle.getSpeed());
+        this.roll += (vehicle.motion().getSpeed() * vehicle.motion().getSpeed()) * 256.0 * Math.signum(vehicle.motion().getSpeed());
         this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
