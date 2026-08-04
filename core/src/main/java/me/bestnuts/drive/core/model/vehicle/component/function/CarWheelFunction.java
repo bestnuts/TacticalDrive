@@ -19,15 +19,19 @@ import org.joml.Quaternionf;
 
 import java.util.Map;
 
+import static me.bestnuts.drive.api.bukkit.util.Constant.FIXED_DELTA_TIME;
+
 public final class CarWheelFunction extends VehicleFunction {
 
     private static final double THROTTLE_EPSILON = 0.01;
     private static final double SPEED_EPSILON = 0.01;
     private static final double TRACTION_SPEED = 3.0;
+    private static final double MIN_RADIUS = 0.05;
 
     private final boolean steerable;
     private final boolean driven;
     private final double sideSign;
+    private final double radius;
     private final String link;
 
     private VehicleSeat seat;
@@ -40,6 +44,7 @@ public final class CarWheelFunction extends VehicleFunction {
         this.steerable = Boolean.parseBoolean(param.getOrDefault("steerable", "false"));
         this.driven = Boolean.parseBoolean(param.getOrDefault("driven", "false"));
         this.sideSign = Double.parseDouble(param.getOrDefault("side-sign", "0"));
+        this.radius = Math.max(Double.parseDouble(param.getOrDefault("radius", "0.5")), MIN_RADIUS);
         this.link = param.getOrDefault("link", "root");
     }
 
@@ -91,8 +96,7 @@ public final class CarWheelFunction extends VehicleFunction {
 
         float carYaw = vehicle.entity().getLocation().getYaw();
 
-        this.roll += (speed * speed) * 256.0 * Math.signum(speed);
-        this.roll = this.roll % 360.0;
+        this.roll = (this.roll + Math.toDegrees(speed / this.radius) * FIXED_DELTA_TIME) % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
         updateRotation(vehicle, carYaw, structuralSteer, rollRad);
