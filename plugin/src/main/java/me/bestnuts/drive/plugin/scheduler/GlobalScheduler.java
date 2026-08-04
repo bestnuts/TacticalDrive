@@ -26,14 +26,11 @@ public final class GlobalScheduler {
     }
 
     public void runTick() {
-        Iterator<Vehicle> iterator = vehicleManager.getAll().iterator();
-        while (iterator.hasNext()) {
-            Vehicle vehicle = iterator.next();
-             if (!vehicle.entity().isValid()) {
-                 vehicleManager.unregister(vehicle.entity().getUniqueId());
-                 iterator.remove();
-                 continue;
-             }
+        for (Vehicle vehicle : vehicleManager.getAll()) {
+            if (!vehicle.entity().isValid()) {
+                vehicleManager.unregister(vehicle.entity().getUniqueId());
+                continue;
+            }
             vehicle.tick();
         }
 
