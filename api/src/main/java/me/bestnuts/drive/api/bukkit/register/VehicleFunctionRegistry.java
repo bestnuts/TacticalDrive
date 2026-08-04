@@ -20,10 +20,6 @@ public final class VehicleFunctionRegistry {
         return map.get(name);
     }
 
-    public @NotNull Collection<String> names() {
-        return map.keySet();
-    }
-
     public void clear() {
         map.clear();
     }

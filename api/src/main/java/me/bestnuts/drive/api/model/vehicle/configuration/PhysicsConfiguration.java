@@ -16,9 +16,6 @@ public abstract class PhysicsConfiguration implements SharedConfiguration {
     private final double mass;
     private final double dragCoefficient;
 
-    private final int maxRPM;
-    private final int idleRPM;
-
     public PhysicsConfiguration(@NotNull VehicleConfiguration parent, @NotNull FileConfiguration configuration) {
         this.parent = parent;
 
@@ -28,9 +25,6 @@ public abstract class PhysicsConfiguration implements SharedConfiguration {
         gravity = configuration.getDouble("physics.gravity", 9.81);
         mass = configuration.getDouble("physics.mass", 500.0);
         dragCoefficient = configuration.getDouble("physics.drag-coefficient", 1.7);
-
-        maxRPM = configuration.getInt("physics.max-rpm", 1200);
-        idleRPM = configuration.getInt("physics.idle-rpm", 600);
     }
 
     @Override

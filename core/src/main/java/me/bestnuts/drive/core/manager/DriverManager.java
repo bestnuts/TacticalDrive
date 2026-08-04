@@ -11,11 +11,6 @@ public final class DriverManager implements AbstractDriverManager {
     private final Map<UUID, Driver> idMap = new HashMap<>();
 
     @Override
-    public @NotNull String type() {
-        return "driver";
-    }
-
-    @Override
     public @NotNull Optional<Driver> find(UUID uuid) {
         return Optional.ofNullable(idMap.get(uuid));
     }

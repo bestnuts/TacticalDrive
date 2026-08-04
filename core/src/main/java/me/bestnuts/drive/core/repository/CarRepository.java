@@ -1,6 +1,5 @@
 package me.bestnuts.drive.core.repository;
 
-import lombok.Getter;
 import me.bestnuts.drive.api.bukkit.register.VehicleFactoryRegistry;
 import me.bestnuts.drive.api.manager.GroupFactory;
 import me.bestnuts.drive.api.manager.VehicleFactory;
@@ -12,15 +11,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
-@Getter
 public final class CarRepository {
-
-    private final VehicleFactory carFactory;
 
     public CarRepository(@NotNull SharedRepository shared, @NotNull VehicleFactoryRegistry factoryRegistry, @NotNull File dir) {
         GroupFactory groupFactory = new SharedGroupFactory(new CarBoneFactory(shared.getEntityFactory(), shared.getFunctionFactory()));
         CarConfigurationFactory configurationFactory = new CarConfigurationFactory(dir);
-        carFactory = new CarFactory(shared.getEntityFactory(), groupFactory, configurationFactory);
+        VehicleFactory carFactory = new CarFactory(shared.getEntityFactory(), groupFactory, configurationFactory);
         factoryRegistry.register(carFactory);
     }
 }

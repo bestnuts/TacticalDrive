@@ -13,11 +13,6 @@ public final class VehicleManager implements AbstractVehicleManager {
     private final Map<String, Map<UUID, Vehicle>> typeMap = new HashMap<>();
 
     @Override
-    public @NotNull String type() {
-        return "vehicle";
-    }
-
-    @Override
     public @NotNull Optional<Vehicle> find(UUID id) {
         return Optional.ofNullable(idMap.get(id));
     }
@@ -51,11 +46,6 @@ public final class VehicleManager implements AbstractVehicleManager {
     @Override
     public @NotNull Collection<Vehicle> getByType(VehicleRegistryType type) {
         Map<UUID, Vehicle> subMap = typeMap.get(type.getName());
-        return subMap != null ? Collections.unmodifiableCollection(subMap.values()) : Collections.emptyList();
-    }
-
-    public @NotNull Collection<Vehicle> getByType(String type) {
-        Map<UUID, Vehicle> subMap = typeMap.get(type);
         return subMap != null ? Collections.unmodifiableCollection(subMap.values()) : Collections.emptyList();
     }
 

@@ -19,8 +19,4 @@ public abstract class HitboxFunction extends VehicleFunction {
         Vector size = FunctionParamHelper.getVector(param.getOrDefault("size", "1;1;1"), new Vector(1, 1, 1));
         this.hitbox = new VehicleHitbox(size);
     }
-
-    public boolean containsHitbox(@NotNull Vector vector) {
-        return hitbox.contains(vector);
-    }
 }
