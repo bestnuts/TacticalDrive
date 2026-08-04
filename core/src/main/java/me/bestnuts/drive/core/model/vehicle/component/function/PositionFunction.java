@@ -1,6 +1,7 @@
 package me.bestnuts.drive.core.model.vehicle.component.function;
 
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
+import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
@@ -35,7 +36,9 @@ public final class PositionFunction extends VehicleFunction {
         Location location = pivot.getLocation().clone();
         location.add(world);
 
-        Vector offset = FunctionParamHelper.rotateVectorByDirection(location, local);
+        Vector offset = RotationHelper.rotate(
+                RotationHelper.orientation(location.getYaw(), vehicle.motion().getPitch(), vehicle.motion().getRoll()),
+                local);
 
         location.add(offset);
         location.setRotation(getParent().getLocation().getRotation());

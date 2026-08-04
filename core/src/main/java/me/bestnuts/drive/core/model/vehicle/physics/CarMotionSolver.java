@@ -1,6 +1,6 @@
 package me.bestnuts.drive.core.model.vehicle.physics;
 
-import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
+import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleMotion;
 import me.bestnuts.drive.core.model.vehicle.configuration.CarHandleConfiguration;
@@ -265,7 +265,7 @@ public final class CarMotionSolver {
         Vector horizontalVelocity = forwardVector.multiply(motion.getSpeed() * FIXED_DELTA_TIME);
 
         if (collision.locked() && collision.pushBack().length() > MOVEMENT_EPSILON) {
-            Vector worldPushDirection = FunctionParamHelper.rotateVectorByDirection(location, collision.pushBack().normalize());
+            Vector worldPushDirection = RotationHelper.rotateByYaw(location, collision.pushBack().normalize());
             horizontalVelocity.add(worldPushDirection.multiply(physics.getCollisionPushDistance()));
         }
 

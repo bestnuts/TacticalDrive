@@ -1,5 +1,6 @@
 package me.bestnuts.drive.core.model.vehicle.component.function;
 
+import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.VehicleHitbox;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
@@ -15,7 +16,6 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
 
 import java.util.Map;
 
@@ -92,15 +92,8 @@ public final class CarBodyFunction extends HitboxFunction {
             return;
         }
 
-        float pitchRad = (float) Math.toRadians(-pitch);
-        float rollRad = (float) Math.toRadians(-roll);
-
-        Quaternionf pitchQuaternion = new Quaternionf().rotationX(pitchRad);
-        Quaternionf rollQuaternion = new Quaternionf().rotationZ(rollRad);
-        Quaternionf finalRotation = pitchQuaternion.mul(rollQuaternion);
-
         Transformation transformation = display.getTransformation();
-        transformation.getLeftRotation().set(finalRotation);
+        transformation.getLeftRotation().set(RotationHelper.tilt(pitch, roll));
 
         display.setTransformation(transformation);
     }

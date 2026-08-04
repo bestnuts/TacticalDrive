@@ -1,6 +1,7 @@
 package me.bestnuts.drive.core.model.vehicle.component.function;
 
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
+import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.entity.Driver;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
@@ -75,7 +76,8 @@ public final class CarWheelFunction extends VehicleFunction {
             lateralForce = centrifugalTarget * surfaceFriction * (1.0 + (this.sideSign * 0.1));
         }
 
-        float steerYaw = (float) (vehicle.entity().getLocation().getYaw() + structuralSteer);
+        float carYaw = vehicle.entity().getLocation().getYaw();
+        double visualSteer = structuralSteer;
 
         if (vehicle.motion().getSpeed() < 0) {
             structuralSteer = -structuralSteer;
@@ -85,22 +87,25 @@ public final class CarWheelFunction extends VehicleFunction {
         this.roll = this.roll % 360.0;
         float rollRad = (float) Math.toRadians(this.roll);
 
-        updateRotation(steerYaw, rollRad);
+        updateRotation(vehicle, carYaw, visualSteer, rollRad);
 
         return new WheelOutput(forwardForce, lateralForce, structuralSteer);
     }
 
-    private void updateRotation(float yaw, float roll) {
+    private void updateRotation(@NotNull Vehicle vehicle, float carYaw, double steer, float spin) {
         Entity entity = getParent().getEntity();
-        entity.setRotation(yaw, 0);
+        entity.setRotation(carYaw, 0);
         if (!(entity instanceof Display display)) {
             return;
         }
-        Quaternionf quaternionf = new Quaternionf().rotationX(roll);
+
+        Quaternionf rotation = RotationHelper.tilt(vehicle.motion().getPitch(), vehicle.motion().getRoll())
+                .mul(new Quaternionf().rotationY((float) Math.toRadians(-steer)))
+                .mul(new Quaternionf().rotationX(spin));
 
         Transformation transformation = display.getTransformation();
 
-        transformation.getLeftRotation().set(quaternionf);
+        transformation.getLeftRotation().set(rotation);
 
         display.setTransformation(transformation);
     }

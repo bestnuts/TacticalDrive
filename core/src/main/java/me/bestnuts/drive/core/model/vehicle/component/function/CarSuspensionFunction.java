@@ -1,6 +1,7 @@
 package me.bestnuts.drive.core.model.vehicle.component.function;
 
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
+import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
@@ -16,6 +17,7 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.Map;
@@ -56,7 +58,9 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         Location pivotLocation = pivot.getLocation().clone();
 
-        Vector rotatedLocal = FunctionParamHelper.rotateVectorByDirection(pivotLocation, this.offset);
+        Quaternionf orientation = RotationHelper.orientation(
+                pivotLocation.getYaw(), vehicle.motion().getPitch(), vehicle.motion().getRoll());
+        Vector rotatedLocal = RotationHelper.rotate(orientation, this.offset);
         Location suspensionTopLoc = pivotLocation.clone().add(rotatedLocal);
         World bukkitWorld = suspensionTopLoc.getWorld();
 
@@ -125,23 +129,14 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         Location carLocation = pivot.getLocation();
 
-        double worldXDiff = suspensionTopLoc.getX() - carLocation.getX();
-        double worldZDiff = suspensionTopLoc.getZ() - carLocation.getZ();
-
-        double carYawRad = Math.toRadians(-carLocation.getYaw());
-        double cosYaw = Math.cos(carYawRad);
-        double sinYaw = Math.sin(carYawRad);
-
-        float localX = (float) (worldXDiff * cosYaw - worldZDiff * sinYaw);
-        float localZ = (float) (worldXDiff * sinYaw + worldZDiff * cosYaw);
-
-        double localYTranslation = wheelWorldY - suspensionTopLoc.getY();
-        float localY = (float) (this.offset.getY() + localYTranslation + this.height);
+        Vector localDiff = RotationHelper.inverseYaw(carLocation.getYaw(),
+                suspensionTopLoc.toVector().subtract(carLocation.toVector()));
+        float localY = (float) ((wheelWorldY - carLocation.getY()) + this.height);
 
         Transformation transformation = display.getTransformation();
         Vector3f translation = transformation.getTranslation();
 
-        translation.set(localX, localY, localZ);
+        translation.set((float) localDiff.getX(), localY, (float) localDiff.getZ());
 
         display.setTransformation(transformation);
     }

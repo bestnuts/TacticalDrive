@@ -2,7 +2,6 @@ package me.bestnuts.drive.api.bukkit.util;
 
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
-import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -34,18 +33,5 @@ public final class FunctionParamHelper {
         } else {
             return optional.get();
         }
-    }
-
-    public static @NotNull Vector rotateVectorByDirection(Location location, Vector local) {
-        Vector forward = location.getDirection().normalize();
-        Vector up = new Vector(0, 1, 0);
-        Vector right = forward.clone().crossProduct(up).normalize();
-
-        Vector result = new Vector(0, 0, 0);
-        result.add(right.clone().multiply(-local.getX()));
-        result.add(up.clone().multiply(local.getY()));
-        result.add(forward.clone().multiply(local.getZ()));
-
-        return result;
     }
 }
