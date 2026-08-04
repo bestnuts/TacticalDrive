@@ -29,19 +29,25 @@ public final class GlobalScheduler {
         Iterator<Vehicle> iterator = vehicleManager.getAll().iterator();
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
+             if (!vehicle.entity().isValid()) {
+                 iterator.remove();
+                 continue;
+             }
             vehicle.tick();
         }
 
         for (Driver driver : driverManager.getAll()) {
-            Input input = ((Player) driver.getEntity()).getCurrentInput();
-            boolean isW = input.isForward();
-            boolean isS = input.isBackward();
-            boolean isA = input.isLeft();
-            boolean isD = input.isRight();
-            float sideway = isA && !isD ? -1 : !isA && isD ? 1 : 0;
-            float forward = isW && !isS ? 1 : !isW && isS ? -1 : 0;
-            driver.getInput().setSideway(sideway);
-            driver.getInput().setForward(forward);
+            if (driver.getEntity() instanceof Player player) {
+                Input input = player.getCurrentInput();
+                boolean isW = input.isForward();
+                boolean isS = input.isBackward();
+                boolean isA = input.isLeft();
+                boolean isD = input.isRight();
+                float sideway = isA && !isD ? -1 : !isA && isD ? 1 : 0;
+                float forward = isW && !isS ? 1 : !isW && isS ? -1 : 0;
+                driver.getInput().setSideway(sideway);
+                driver.getInput().setForward(forward);
+            }
         }
     }
 
