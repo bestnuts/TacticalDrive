@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 import static me.bestnuts.drive.api.bukkit.util.Constant.FIXED_DELTA_TIME;
 
@@ -54,9 +55,9 @@ public final class CarMotionSolver {
                                    @NotNull List<BodyOutput> bodies) {
         CollisionState collision = resolveCollision(suspensions, bodies);
         updateBodyAngles(motion, suspensions);
-        double deltaY = resolveVerticalMotion(location, suspensions, collision.locked());
+        double deltaY = resolveVerticalMotion(location, motion, suspensions);
         updateSteer(motion, wheels);
-        integrateSpeed(motion, wheels, collision);
+        integrateSpeed(motion, wheels, suspensions, collision);
 
         Location moved = move(location, resolveVelocity(location, motion, deltaY, collision), motion);
         return move(moved, moved.getDirection().multiply(motion.getSpeed()), motion);
@@ -68,7 +69,7 @@ public final class CarMotionSolver {
         Vector pushBack = new Vector(0, 0, 0);
 
         for (SuspensionOutput output : suspensions) {
-            if (!output.lock()) continue;
+            if (!output.wall()) continue;
             locked = true;
             Vector offset = output.offset();
             torqueFactor += (offset.getX() * offset.getZ());
@@ -92,6 +93,7 @@ public final class CarMotionSolver {
         int flCount = 0, frCount = 0, rlCount = 0, rrCount = 0;
 
         for (SuspensionOutput output : suspensions) {
+            if (!output.grounded()) continue;
             Vector offset = output.offset();
             if (offset.getZ() > 0 && offset.getX() < 0) { frontLeftY += output.wheelWorldY(); flCount++; }
             else if (offset.getZ() > 0 && offset.getX() > 0) { frontRightY += output.wheelWorldY(); frCount++; }
@@ -146,29 +148,21 @@ public final class CarMotionSolver {
         return new ChassisSize(length, width);
     }
 
-    private double resolveVerticalMotion(@NotNull Location location, @NotNull List<SuspensionOutput> suspensions, boolean locked) {
-        if (suspensions.isEmpty()) return 0.0;
-
-        double totalWheelWorldY = 0.0;
+    private double resolveVerticalMotion(@NotNull Location location, @NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions) {
+        double totalUpwardForce = 0.0;
         for (SuspensionOutput output : suspensions) {
-            totalWheelWorldY += output.wheelWorldY();
+            if (!output.grounded()) continue;
+            totalUpwardForce += output.upwardForce();
         }
 
-        double averageGroundY = totalWheelWorldY / suspensions.size();
-        double targetVehicleY = averageGroundY + physics.getRestLength();
+        double acceleration = (totalUpwardForce / physics.getMass()) - physics.getGravity();
+        double verticalVelocity = motion.getVerticalVelocity() + acceleration * FIXED_DELTA_TIME;
+        double deltaY = verticalVelocity * FIXED_DELTA_TIME;
 
-        double currentY = location.getY();
-        double newY;
-
-        if (targetVehicleY > currentY) {
-            newY = targetVehicleY;
-        } else {
-            double smoothingFactor = locked ? physics.getRideHeightSmoothingLocked() : physics.getRideHeightSmoothing();
-            newY = currentY + (targetVehicleY - currentY) * smoothingFactor * FIXED_DELTA_TIME;
+        if (Math.abs(deltaY) <= MOVEMENT_EPSILON) {
+            motion.setVerticalVelocity(verticalVelocity);
+            return deltaY;
         }
-
-        double deltaY = newY - currentY;
-        if (Math.abs(deltaY) <= MOVEMENT_EPSILON) return deltaY;
 
         Vector yDirection = new Vector(0, deltaY > 0 ? 1 : -1, 0);
         RayTraceResult yHit = location.getWorld().rayTraceBlocks(
@@ -179,8 +173,13 @@ public final class CarMotionSolver {
                 true
         );
 
-        if (yHit == null || yHit.getHitBlock() == null) return deltaY;
+        if (yHit == null || yHit.getHitBlock() == null) {
+            motion.setVerticalVelocity(verticalVelocity);
+            return deltaY;
+        }
 
+        motion.setVerticalVelocity(0.0);
+        double currentY = location.getY();
         double hitY = yHit.getHitPosition().getY();
         return deltaY > 0 ? (hitY - CEILING_INSET) - currentY : (hitY + GROUND_INSET) - currentY;
     }
@@ -205,13 +204,16 @@ public final class CarMotionSolver {
         motion.setSteer(motion.getSteer() + (targetSteer - motion.getSteer()) * handle.getSteerSmoothing() * FIXED_DELTA_TIME);
     }
 
-    private void integrateSpeed(@NotNull VehicleMotion motion, @NotNull List<WheelOutput> wheels, @NotNull CollisionState collision) {
+    private void integrateSpeed(@NotNull VehicleMotion motion, @NotNull List<WheelOutput> wheels,
+                                @NotNull List<SuspensionOutput> suspensions, @NotNull CollisionState collision) {
         double combinedForwardForce = 0.0;
         double combinedLateralForce = 0.0;
 
         for (WheelOutput output : wheels) {
-            combinedForwardForce += output.forwardForce();
-            combinedLateralForce += output.lateralForce();
+            double surfaceFriction = surfaceFrictionOf(output.boneId(), suspensions);
+            if (surfaceFriction <= 0.0) continue;
+            combinedForwardForce += output.forwardForce() * surfaceFriction;
+            combinedLateralForce += output.lateralForce() * surfaceFriction;
         }
 
         double totalEngineForce = combinedForwardForce * (physics.getHorsePower() * HORSEPOWER_TO_WATT) * physics.getEngineForceScale();
@@ -233,15 +235,10 @@ public final class CarMotionSolver {
         double netForce = speed >= 0.0 ? totalEngineForce - totalResistanceMagnitude : totalEngineForce + totalResistanceMagnitude;
         speed += (netForce / mass) * FIXED_DELTA_TIME;
 
-        boolean engineDrivingIntoCollision = (speed > 0.0 && totalEngineForce > 0.0) || (speed < 0.0 && totalEngineForce < 0.0);
-        if (collision.locked() && engineDrivingIntoCollision) {
-            if (Math.abs(collision.torqueFactor()) < TORQUE_EPSILON) {
-                speed = 0.0;
-            } else {
-                double torque = collision.torqueFactor() * physics.getCollisionTorqueImpact() * FIXED_DELTA_TIME;
-                motion.setSteer(speed > 0.0 ? motion.getSteer() + torque : motion.getSteer() - torque);
-                speed = speed * (1.0 - physics.getCollisionSpeedLoss());
-            }
+        if (collision.locked() && Math.abs(speed) > SPEED_EPSILON) {
+            double torque = collision.torqueFactor() * physics.getCollisionTorqueImpact() * FIXED_DELTA_TIME;
+            motion.setSteer(speed > 0.0 ? motion.getSteer() + torque : motion.getSteer() - torque);
+            speed = -speed * physics.getCollisionRestitution() * (1.0 - physics.getCollisionSpeedLoss());
         }
 
         if (Math.abs(combinedLateralForce) > (mass * handle.getSlideForceRatio()) && speed > handle.getSlideMinSpeed()) {
@@ -253,6 +250,14 @@ public final class CarMotionSolver {
         if (speed < -maxReverseSpeed) speed = -maxReverseSpeed;
 
         motion.setSpeed(speed);
+    }
+
+    private double surfaceFrictionOf(@NotNull UUID boneId, @NotNull List<SuspensionOutput> suspensions) {
+        for (SuspensionOutput output : suspensions) {
+            if (!output.boneId().equals(boneId)) continue;
+            return output.grounded() ? output.friction() : 0.0;
+        }
+        return 1.0;
     }
 
     private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion, double deltaY, @NotNull CollisionState collision) {

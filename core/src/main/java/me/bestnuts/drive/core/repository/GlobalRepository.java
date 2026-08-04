@@ -1,6 +1,7 @@
 package me.bestnuts.drive.core.repository;
 
 import lombok.Getter;
+import me.bestnuts.drive.api.bukkit.register.SurfaceFrictionRegistry;
 import me.bestnuts.drive.api.bukkit.register.VehicleFactoryRegistry;
 import me.bestnuts.drive.api.bukkit.register.VehicleFunctionRegistry;
 import me.bestnuts.drive.api.manager.AbstractDriverManager;
@@ -19,6 +20,7 @@ public final class GlobalRepository {
 
     private final VehicleFactoryRegistry factoryRegistry;
     private final VehicleFunctionRegistry functionRegistry;
+    private final SurfaceFrictionRegistry frictionRegistry;
 
     private final AbstractDriverManager driverManager;
     private final AbstractVehicleManager vehicleManager;
@@ -34,6 +36,7 @@ public final class GlobalRepository {
     public GlobalRepository(@NotNull JavaPlugin plugin) {
         factoryRegistry = new VehicleFactoryRegistry();
         functionRegistry = new VehicleFunctionRegistry();
+        frictionRegistry = new SurfaceFrictionRegistry();
 
         driverManager = new DriverManager();
         vehicleManager = new VehicleManager();
@@ -50,6 +53,7 @@ public final class GlobalRepository {
     public void clear() {
         factoryRegistry.clear();
         functionRegistry.clear();
+        frictionRegistry.clear();
         driverManager.clear();
         vehicleManager.clear();
     }

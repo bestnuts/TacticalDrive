@@ -1,4 +1,6 @@
 package me.bestnuts.drive.core.model.vehicle.data;
 
-public record WheelOutput(double forwardForce, double lateralForce, double wheelSteer) implements CarOutput {
+import java.util.UUID;
+
+public record WheelOutput(UUID boneId, double forwardForce, double lateralForce, double wheelSteer) implements CarOutput {
 }

@@ -11,4 +11,5 @@ public final class VehicleMotion {
     private double steer;
     private double pitch;
     private double roll;
+    private double verticalVelocity;
 }

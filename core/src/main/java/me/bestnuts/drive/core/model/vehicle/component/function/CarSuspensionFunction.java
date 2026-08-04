@@ -1,17 +1,18 @@
 package me.bestnuts.drive.core.model.vehicle.component.function;
 
+import me.bestnuts.drive.api.bukkit.register.SurfaceFrictionRegistry;
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
-import me.bestnuts.drive.api.model.vehicle.configuration.PhysicsConfiguration;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleMotion;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
+import me.bestnuts.drive.core.model.vehicle.configuration.CarPhysicsConfiguration;
 import me.bestnuts.drive.core.model.vehicle.data.SuspensionOutput;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Display;
+import org.bukkit.Material;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
@@ -26,6 +27,11 @@ import static me.bestnuts.drive.api.bukkit.util.Constant.FIXED_DELTA_TIME;
 
 public final class CarSuspensionFunction extends VehicleFunction {
 
+    private static final double PROBE_BUFFER = 1.5;
+    private static final double GROUND_INSET = 0.05;
+
+    private final SurfaceFrictionRegistry frictionRegistry;
+
     private final double height;
     private final double stiffness;
     private final double damping;
@@ -35,11 +41,13 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private final String link;
 
     private VehicleEntity pivot;
-    private PhysicsConfiguration physicsConfiguration;
+    private CarPhysicsConfiguration physics;
     private double previousCompression;
 
-    public CarSuspensionFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
+    public CarSuspensionFunction(@NotNull SurfaceFrictionRegistry frictionRegistry,
+                                 @NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
+        this.frictionRegistry = frictionRegistry;
         this.height = Double.parseDouble(param.getOrDefault("height", "0.5"));
         this.stiffness = Double.parseDouble(param.getOrDefault("stiffness", "12000.0"));
         this.damping = Double.parseDouble(param.getOrDefault("damping", "1800.0"));
@@ -53,84 +61,86 @@ public final class CarSuspensionFunction extends VehicleFunction {
     public @Nullable VehicleOutput execute(@NotNull Vehicle vehicle) {
         if (pivot == null) {
             pivot = FunctionParamHelper.getLink(link, vehicle);
-            physicsConfiguration = vehicle.configuration().getPhysics();
+            physics = (CarPhysicsConfiguration) vehicle.configuration().getPhysics();
         }
 
+        Location anchor = resolveAnchor(vehicle.motion());
+        GroundProbe probe = probeGround(anchor);
+        double anchorY = anchor.getY();
+
+        if (probe != null && probe.hitY() > anchorY + physics.getMaxStepHeight()) {
+            previousCompression = 0.0;
+            return wall(anchorY);
+        }
+
+        if (probe == null || probe.hitY() < anchorY - restLength) {
+            previousCompression = 0.0;
+            return airborne(anchor, anchorY - restLength);
+        }
+
+        double compression = restLength - (anchorY - probe.hitY());
+        double wheelWorldY = probe.hitY() + GROUND_INSET;
+
+        double force = springForce(compression, vehicle.motion());
+        updateTranslation(anchor, wheelWorldY);
+
+        return new SuspensionOutput(getParent().getUniqueId(), force, wheelWorldY,
+                true, false, frictionRegistry.find(probe.material()), this.offset);
+    }
+
+    private @NotNull Location resolveAnchor(@NotNull VehicleMotion motion) {
         Location pivotLocation = pivot.getLocation().clone();
+        Quaternionf orientation = RotationHelper.orientation(pivotLocation.getYaw(), motion.getPitch(), motion.getRoll());
+        return pivotLocation.add(RotationHelper.rotate(orientation, this.offset));
+    }
 
-        Quaternionf orientation = RotationHelper.orientation(
-                pivotLocation.getYaw(), vehicle.motion().getPitch(), vehicle.motion().getRoll());
-        Vector rotatedLocal = RotationHelper.rotate(orientation, this.offset);
-        Location suspensionTopLoc = pivotLocation.clone().add(rotatedLocal);
-        World bukkitWorld = suspensionTopLoc.getWorld();
-
-        double checkHeightBuffer = 1.5;
-        Location rayStart = suspensionTopLoc.clone().add(0, checkHeightBuffer, 0);
-
-        Block startBlock = rayStart.getBlock();
-        if (startBlock.getType().isSolid()) {
-            return new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.offset);
+    private @Nullable GroundProbe probeGround(@NotNull Location anchor) {
+        Location rayStart = anchor.clone().add(0, PROBE_BUFFER, 0);
+        if (rayStart.getBlock().getType().isSolid()) {
+            return new GroundProbe(rayStart.getY(), rayStart.getBlock().getType());
         }
 
-        Vector downDirection = new Vector(0, -1, 0);
-        double totalSearchDistance = this.restLength + checkHeightBuffer;
+        RayTraceResult hit = anchor.getWorld().rayTraceBlocks(
+                rayStart, new Vector(0, -1, 0), restLength + PROBE_BUFFER, FluidCollisionMode.NEVER, true);
 
-        RayTraceResult hit = bukkitWorld.rayTraceBlocks(rayStart, downDirection, totalSearchDistance, org.bukkit.FluidCollisionMode.NEVER, true);
+        if (hit == null || hit.getHitBlock() == null) return null;
+        return new GroundProbe(hit.getHitPosition().getY(), hit.getHitBlock().getType());
+    }
 
-        double currentLength = this.restLength;
-        double groundY = suspensionTopLoc.getY() - this.restLength;
-
-        if (hit != null && hit.getHitBlock() != null) {
-            double actualHitY = hit.getHitPosition().getY();
-            double suspensionBaseY = suspensionTopLoc.getY();
-
-            double maxAllowedUpwardClimb = 0.6;
-            double maxHitY = suspensionBaseY + maxAllowedUpwardClimb;
-            double minHitY = suspensionBaseY - (this.restLength * 1.15);
-
-            if (actualHitY > maxHitY) {
-                actualHitY = maxHitY;
-            }
-
-            if (actualHitY >= minHitY) {
-                currentLength = suspensionBaseY - actualHitY;
-                groundY = actualHitY + 0.05;
-            } else {
-                currentLength = this.restLength;
-                groundY = suspensionBaseY - this.restLength;
-            }
-        }
-
-        double compression = this.restLength - currentLength;
-        if (compression < 0) compression = 0;
-
+    private double springForce(double compression, @NotNull VehicleMotion motion) {
         double springForce = compression * this.stiffness;
 
         double compressionVelocity = (compression - this.previousCompression) / FIXED_DELTA_TIME;
         this.previousCompression = compression;
         double dampingForce = compressionVelocity * this.damping;
 
-        double totalUpwardForce = springForce + dampingForce;
-        if (totalUpwardForce < 0) totalUpwardForce = 0;
+        double total = springForce + dampingForce;
+        if (total < 0) total = 0;
 
-        totalUpwardForce = Math.min(totalUpwardForce, (physicsConfiguration.getMass() * physicsConfiguration.getGravity()) * 2.2);
-
-        double wheelWorldY = (compression > 0) ? (groundY) : (suspensionTopLoc.getY() - this.restLength);
-
-        updateTranslation(suspensionTopLoc, wheelWorldY);
-
-        return new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.offset);
+        double limit = physics.getMass() * physics.getGravity() * physics.getSuspensionForceLimit();
+        return Math.min(total, limit);
     }
 
-    private void updateTranslation(Location suspensionTopLoc, double wheelWorldY) {
-        if (!(getParent().getEntity() instanceof Display display)) {
+    private @NotNull SuspensionOutput wall(double anchorY) {
+        return new SuspensionOutput(getParent().getUniqueId(), 0.0, anchorY - restLength,
+                false, true, frictionRegistry.getDefaultFriction(), this.offset);
+    }
+
+    private @NotNull SuspensionOutput airborne(@NotNull Location anchor, double wheelWorldY) {
+        updateTranslation(anchor, wheelWorldY);
+        return new SuspensionOutput(getParent().getUniqueId(), 0.0, wheelWorldY,
+                false, false, frictionRegistry.getDefaultFriction(), this.offset);
+    }
+
+    private void updateTranslation(@NotNull Location anchor, double wheelWorldY) {
+        if (!(getParent().getEntity() instanceof org.bukkit.entity.Display display)) {
             return;
         }
 
         Location carLocation = pivot.getLocation();
 
         Vector localDiff = RotationHelper.inverseYaw(carLocation.getYaw(),
-                suspensionTopLoc.toVector().subtract(carLocation.toVector()));
+                anchor.toVector().subtract(carLocation.toVector()));
         float localY = (float) ((wheelWorldY - carLocation.getY()) + this.height);
 
         Transformation transformation = display.getTransformation();
@@ -139,5 +149,8 @@ public final class CarSuspensionFunction extends VehicleFunction {
         translation.set((float) localDiff.getX(), localY, (float) localDiff.getZ());
 
         display.setTransformation(transformation);
+    }
+
+    private record GroundProbe(double hitY, Material material) {
     }
 }

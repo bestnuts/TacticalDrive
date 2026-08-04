@@ -64,16 +64,16 @@ public final class CarWheelFunction extends VehicleFunction {
             structuralSteer = rawSteering * handleConfiguration.getSteeringAngleMax() * handleConfiguration.getSteeringSensitivity();
         }
 
-        double surfaceFriction = 1.0 * handleConfiguration.getWheelFriction();
+        double tireFriction = handleConfiguration.getWheelFriction();
 
         if (this.driven && Math.abs(rawThrottle) > 0.01) {
             double slipRatio = (vehicle.motion().getSpeed() < 3.0) ? 0.7 : 0.1;
-            forwardForce = rawThrottle * surfaceFriction * (1.0 - slipRatio);
+            forwardForce = rawThrottle * tireFriction * (1.0 - slipRatio);
         }
 
         if (Math.abs(vehicle.motion().getSteer()) > 0.1) {
             double centrifugalTarget = Math.sin(Math.toRadians(vehicle.motion().getSteer())) * vehicle.motion().getSpeed();
-            lateralForce = centrifugalTarget * surfaceFriction * (1.0 + (this.sideSign * 0.1));
+            lateralForce = centrifugalTarget * tireFriction * (1.0 + (this.sideSign * 0.1));
         }
 
         float carYaw = vehicle.entity().getLocation().getYaw();
@@ -89,7 +89,7 @@ public final class CarWheelFunction extends VehicleFunction {
 
         updateRotation(vehicle, carYaw, visualSteer, rollRad);
 
-        return new WheelOutput(forwardForce, lateralForce, structuralSteer);
+        return new WheelOutput(getParent().getUniqueId(), forwardForce, lateralForce, structuralSteer);
     }
 
     private void updateRotation(@NotNull Vehicle vehicle, float carYaw, double steer, float spin) {
