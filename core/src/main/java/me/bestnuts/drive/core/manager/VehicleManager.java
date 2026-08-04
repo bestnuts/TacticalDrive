@@ -1,12 +1,13 @@
 package me.bestnuts.drive.core.manager;
 
+import me.bestnuts.drive.api.manager.AbstractVehicleManager;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.VehicleRegistryType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public final class VehicleManager implements me.bestnuts.drive.api.manager.VehicleManager {
+public final class VehicleManager implements AbstractVehicleManager {
 
     private final Map<UUID, Vehicle> idMap = new HashMap<>();
     private final Map<String, Map<UUID, Vehicle>> typeMap = new HashMap<>();

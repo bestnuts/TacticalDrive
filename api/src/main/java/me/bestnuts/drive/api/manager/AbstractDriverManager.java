@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface DriverManager extends Manager<UUID, Driver> {
+public interface AbstractDriverManager extends Manager<UUID, Driver> {
 
     @NotNull Collection<Driver> getAll();
 }

@@ -1,11 +1,12 @@
 package me.bestnuts.drive.core.manager;
 
+import me.bestnuts.drive.api.manager.AbstractDriverManager;
 import me.bestnuts.drive.api.model.entity.Driver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public final class DriverManager implements me.bestnuts.drive.api.manager.DriverManager {
+public final class DriverManager implements AbstractDriverManager {
 
     private final Map<UUID, Driver> idMap = new HashMap<>();
 

@@ -3,7 +3,7 @@ package me.bestnuts.drive.plugin.listener;
 import me.bestnuts.drive.api.bukkit.register.VehicleFactoryHook;
 import me.bestnuts.drive.api.bukkit.util.DataKeyHelper;
 import me.bestnuts.drive.api.manager.VehicleFactory;
-import me.bestnuts.drive.api.manager.VehicleManager;
+import me.bestnuts.drive.api.manager.AbstractVehicleManager;
 import me.bestnuts.drive.api.model.entity.Driver;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleBone;
@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 public class PlayerInteractVehicle implements Listener {
 
     private final DriverManager driverManager;
-    private final VehicleManager vehicleManager;
+    private final AbstractVehicleManager vehicleManager;
 
     public PlayerInteractVehicle(GlobalRepository repository) {
         driverManager = repository.getDriverManager();

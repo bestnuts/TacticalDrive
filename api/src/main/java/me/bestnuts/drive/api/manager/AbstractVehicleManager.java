@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface VehicleManager extends Manager<UUID, Vehicle> {
+public interface AbstractVehicleManager extends Manager<UUID, Vehicle> {
 
     @NotNull Collection<Vehicle> getByType(VehicleRegistryType type);
 

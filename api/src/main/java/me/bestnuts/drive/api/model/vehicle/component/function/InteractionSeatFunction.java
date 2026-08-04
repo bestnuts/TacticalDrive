@@ -3,7 +3,7 @@ package me.bestnuts.drive.api.model.vehicle.component.function;
 import me.bestnuts.drive.api.bukkit.register.ManagerHook;
 import me.bestnuts.drive.api.bukkit.util.DataKeyHelper;
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
-import me.bestnuts.drive.api.manager.DriverManager;
+import me.bestnuts.drive.api.manager.AbstractDriverManager;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleSeat;
@@ -42,7 +42,7 @@ public final class InteractionSeatFunction extends VehicleFunction {
             Entity entity = getParent().getLocation().getWorld().getEntity(id);
             if (entity == null) return;
             target.getEntity().addPassenger(entity);
-            if (getParent() instanceof VehicleSeat seat && ManagerHook.getHook("driver") instanceof DriverManager driverManager) {
+            if (getParent() instanceof VehicleSeat seat && ManagerHook.getHook("driver") instanceof AbstractDriverManager driverManager) {
                 driverManager.find(id).ifPresent(driver -> {
                     seat.setDriver(driver);
                     driver.setSeatedVehicle(vehicle);
