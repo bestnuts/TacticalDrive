@@ -1,12 +1,17 @@
 package me.bestnuts.drive.api.model.vehicle;
 
+import lombok.Getter;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleBone;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleGroup;
+import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
 import me.bestnuts.drive.api.model.vehicle.configuration.VehicleConfiguration;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +23,11 @@ public abstract class Vehicle {
     private final Map<UUID, VehicleBone> boneByIdMap;
     private final Map<String, UUID> idByPathMap;
     private final VehicleConfiguration configuration;
+
+    @Getter protected double speed;
+    @Getter protected double steer;
+    @Getter protected double pitch;
+    @Getter protected double roll;
 
     public Vehicle(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
         this.entity = entity;
@@ -75,6 +85,16 @@ public abstract class Vehicle {
     public abstract @NotNull String type();
 
     public void tick() {
-        boneByIdMap.values().forEach(bone -> bone.getFunctions().forEach(function -> function.run(this)));
+        List<VehicleOutput> outputs = new ArrayList<>();
+        for (VehicleBone bone : boneByIdMap.values()) {
+            for (VehicleFunction function : bone.getFunctions()) {
+                VehicleOutput output = function.run(this);
+                if (output == null) continue;
+                outputs.add(output);
+            }
+        }
+        apply(outputs);
     }
+
+    protected abstract void apply(@NotNull List<VehicleOutput> outputs);
 }

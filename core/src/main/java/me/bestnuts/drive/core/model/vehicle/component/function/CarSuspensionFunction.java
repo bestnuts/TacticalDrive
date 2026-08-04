@@ -5,7 +5,8 @@ import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
 import me.bestnuts.drive.api.model.vehicle.configuration.PhysicsConfiguration;
-import me.bestnuts.drive.core.model.vehicle.VehicleCar;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
+import me.bestnuts.drive.core.model.vehicle.data.SuspensionOutput;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -14,6 +15,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.Map;
@@ -31,10 +33,8 @@ public final class CarSuspensionFunction extends VehicleFunction {
     private final String link;
 
     private VehicleEntity pivot;
-    private VehicleCar car;
     private PhysicsConfiguration physicsConfiguration;
     private double previousCompression;
-    private boolean isLoad;
 
     public CarSuspensionFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
@@ -48,17 +48,10 @@ public final class CarSuspensionFunction extends VehicleFunction {
     }
 
     @Override
-    public void execute(@NotNull Vehicle vehicle) {
-        if (!isLoad) {
-            if (pivot == null) {
-                pivot = FunctionParamHelper.getLink(link, vehicle);
-            }
-            if (vehicle instanceof VehicleCar vehicleCar) {
-                car = vehicleCar;
-                physicsConfiguration = car.configuration().getPhysics();
-                isLoad = true;
-            }
-            return;
+    public @Nullable VehicleOutput execute(@NotNull Vehicle vehicle) {
+        if (pivot == null) {
+            pivot = FunctionParamHelper.getLink(link, vehicle);
+            physicsConfiguration = vehicle.configuration().getPhysics();
         }
 
         Location pivotLocation = pivot.getLocation().clone();
@@ -72,8 +65,7 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         Block startBlock = rayStart.getBlock();
         if (startBlock.getType().isSolid()) {
-            car.getSuspensionOutputs().add(new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.offset));
-            return;
+            return new SuspensionOutput(0.0, suspensionTopLoc.getY() - this.restLength, true, this.offset);
         }
 
         Vector downDirection = new Vector(0, -1, 0);
@@ -121,8 +113,9 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         double wheelWorldY = (compression > 0) ? (groundY) : (suspensionTopLoc.getY() - this.restLength);
 
-        car.getSuspensionOutputs().add(new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.offset));
         updateTranslation(suspensionTopLoc, wheelWorldY);
+
+        return new SuspensionOutput(totalUpwardForce, wheelWorldY, false, this.offset);
     }
 
     private void updateTranslation(Location suspensionTopLoc, double wheelWorldY) {
@@ -151,9 +144,5 @@ public final class CarSuspensionFunction extends VehicleFunction {
         translation.set(localX, localY, localZ);
 
         display.setTransformation(transformation);
-    }
-
-
-    public record SuspensionOutput(double upwardForce, double wheelWorldY, boolean lock, Vector offset) {
     }
 }

@@ -1,16 +1,17 @@
 package me.bestnuts.drive.core.model.vehicle;
 
-import lombok.Getter;
 import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.VehicleRegistryType;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleGroup;
 import me.bestnuts.drive.api.model.vehicle.configuration.VehicleConfiguration;
-import me.bestnuts.drive.core.model.vehicle.component.function.CarBodyFunction;
-import me.bestnuts.drive.core.model.vehicle.component.function.CarSuspensionFunction;
-import me.bestnuts.drive.core.model.vehicle.component.function.CarWheelFunction;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
 import me.bestnuts.drive.core.model.vehicle.configuration.CarPhysicsConfiguration;
+import me.bestnuts.drive.core.model.vehicle.data.BodyOutput;
+import me.bestnuts.drive.core.model.vehicle.data.CarOutput;
+import me.bestnuts.drive.core.model.vehicle.data.SuspensionOutput;
+import me.bestnuts.drive.core.model.vehicle.data.WheelOutput;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -23,17 +24,7 @@ import java.util.List;
 
 import static me.bestnuts.drive.api.bukkit.util.Constant.FIXED_DELTA_TIME;
 
-@Getter
 public final class VehicleCar extends Vehicle {
-
-    private double steer;
-    private double speed;
-    private double pitch;
-    private double roll;
-
-    private final List<CarWheelFunction.WheelOutput> wheelOutputs = new ArrayList<>();
-    private final List<CarSuspensionFunction.SuspensionOutput> suspensionOutputs = new ArrayList<>();
-    private final List<CarBodyFunction.BodyOutput> bodyOutputs = new ArrayList<>();
 
     public VehicleCar(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
         super(entity, group, configuration);
@@ -45,19 +36,28 @@ public final class VehicleCar extends Vehicle {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void apply(@NotNull List<VehicleOutput> outputs) {
+        List<WheelOutput> wheelOutputs = new ArrayList<>();
+        List<SuspensionOutput> suspensionOutputs = new ArrayList<>();
+        List<BodyOutput> bodyOutputs = new ArrayList<>();
+        for (VehicleOutput output : outputs) {
+            if (!(output instanceof CarOutput carOutput)) continue;
+            switch (carOutput) {
+                case WheelOutput wheel -> wheelOutputs.add(wheel);
+                case SuspensionOutput suspension -> suspensionOutputs.add(suspension);
+                case BodyOutput body -> bodyOutputs.add(body);
+            }
+        }
 
-        Location location = updateValue();
-        wheelOutputs.clear();
-        suspensionOutputs.clear();
-        bodyOutputs.clear();
+        Location location = updateValue(wheelOutputs, suspensionOutputs, bodyOutputs);
         Vector direction = location.getDirection();
         Vector movement = direction.multiply(speed);
         entity().getEntity().teleport(updatePosition(location, movement));
     }
 
-    private Location updateValue() {
+    private Location updateValue(@NotNull List<WheelOutput> wheelOutputs,
+                                 @NotNull List<SuspensionOutput> suspensionOutputs,
+                                 @NotNull List<BodyOutput> bodyOutputs) {
         Location location = entity().getLocation();
 
         boolean isSuspensionLocked = false;
@@ -70,7 +70,7 @@ public final class VehicleCar extends Vehicle {
         double rearLeftY = 0.0, rearRightY = 0.0;
         int flCount = 0, frCount = 0, rlCount = 0, rrCount = 0;
 
-        for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
+        for (SuspensionOutput output : suspensionOutputs) {
             totalWheelWorldY += output.wheelWorldY();
             activeSuspensionCount++;
 
@@ -88,7 +88,7 @@ public final class VehicleCar extends Vehicle {
         }
 
         boolean isBodyLocked = false;
-        for (CarBodyFunction.BodyOutput output : bodyOutputs) {
+        for (BodyOutput output : bodyOutputs) {
             if (output.lock()) {
                 isBodyLocked = true;
                 Vector offset = output.offset();
@@ -96,7 +96,6 @@ public final class VehicleCar extends Vehicle {
                 pushBackLocalVector.add(new Vector(-offset.getX(), 0, -offset.getZ()));
             }
         }
-        bodyOutputs.clear();
 
         boolean isAnyCollisionLocked = isSuspensionLocked || isBodyLocked;
 
@@ -111,9 +110,9 @@ public final class VehicleCar extends Vehicle {
             int lengthSampleCount = 0;
             int widthSampleCount = 0;
 
-            for (CarSuspensionFunction.SuspensionOutput output : suspensionOutputs) {
+            for (SuspensionOutput output : suspensionOutputs) {
                 Vector offset = output.offset();
-                for (CarSuspensionFunction.SuspensionOutput innerOutput : suspensionOutputs) {
+                for (SuspensionOutput innerOutput : suspensionOutputs) {
                     Vector innerOffset = innerOutput.offset();
 
                     double deltaZ = offset.getZ() - innerOffset.getZ();
@@ -189,7 +188,7 @@ public final class VehicleCar extends Vehicle {
             this.steer = 0.0;
         }
 
-        for (CarWheelFunction.WheelOutput output : wheelOutputs) {
+        for (WheelOutput output : wheelOutputs) {
             combinedForwardForce += output.forwardForce();
             combinedLateralForce += output.lateralForce();
 

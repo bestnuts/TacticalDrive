@@ -4,11 +4,13 @@ import me.bestnuts.drive.api.bukkit.util.FunctionParamHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.VehicleFunction;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -25,6 +27,7 @@ public final class DisplayTranslationFunction extends VehicleFunction {
     }
 
     @Override
-    public void execute(@NotNull Vehicle vehicle) {
+    public @Nullable VehicleOutput execute(@NotNull Vehicle vehicle) {
+        return null;
     }
 }

@@ -3,7 +3,9 @@ package me.bestnuts.drive.api.model.vehicle.component.function;
 import lombok.Getter;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -20,14 +22,14 @@ public abstract class VehicleFunction {
         this.tick = delay;
     }
 
-    public void run(@NotNull Vehicle vehicle) {
+    public @Nullable VehicleOutput run(@NotNull Vehicle vehicle) {
         if (tick > 0) {
             tick--;
-            return;
+            return null;
         }
-        execute(vehicle);
         tick = delay;
+        return execute(vehicle);
     }
 
-    public abstract void execute(@NotNull Vehicle vehicle);
+    public abstract @Nullable VehicleOutput execute(@NotNull Vehicle vehicle);
 }

@@ -4,7 +4,8 @@ import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.VehicleHitbox;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.HitboxFunction;
-import me.bestnuts.drive.core.model.vehicle.VehicleCar;
+import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
+import me.bestnuts.drive.core.model.vehicle.data.BodyOutput;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -13,38 +14,28 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.Map;
 
 public final class CarBodyFunction extends HitboxFunction {
 
-    private VehicleCar car;
-    private boolean isLoad;
-
     public CarBodyFunction(@NotNull VehicleEntity parent, int delay, @NotNull Map<String, String> param) {
         super(parent, delay, param);
     }
 
     @Override
-    public void execute(@NotNull Vehicle vehicle) {
-        if (!isLoad) {
-            if (vehicle instanceof VehicleCar vehicleCar) {
-                car = vehicleCar;
-                isLoad = true;
-            }
-            return;
-        }
-
-        updateRotation((float) car.getPitch(), (float) car.getRoll());
+    public @Nullable VehicleOutput execute(@NotNull Vehicle vehicle) {
+        updateRotation((float) vehicle.getPitch(), (float) vehicle.getRoll());
 
         Location bodyLocation = vehicle.entity().getLocation();
         World world = bodyLocation.getWorld();
-        if (world == null) return;
+        if (world == null) return null;
 
         getHitbox().update(bodyLocation);
 
-        double carSpeed = car.getSpeed();
+        double carSpeed = vehicle.getSpeed();
         Vector forwardVector = bodyLocation.getDirection().setY(0).normalize();
 
         double currentMoveDistance = carSpeed * 0.05;
@@ -91,9 +82,8 @@ public final class CarBodyFunction extends HitboxFunction {
             }
         }
 
-        if (isBodyCollided) {
-            car.getBodyOutputs().add(new BodyOutput(true, bodyCollisionOffset));
-        }
+        if (!isBodyCollided) return null;
+        return new BodyOutput(true, bodyCollisionOffset);
     }
 
     private void updateRotation(float pitch, float roll) {
@@ -113,8 +103,5 @@ public final class CarBodyFunction extends HitboxFunction {
         transformation.getLeftRotation().set(finalRotation);
 
         display.setTransformation(transformation);
-    }
-
-    public record BodyOutput(boolean lock, Vector offset) {
     }
 }
