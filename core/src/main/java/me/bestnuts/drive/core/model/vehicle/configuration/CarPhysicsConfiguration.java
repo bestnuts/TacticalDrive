@@ -11,6 +11,7 @@ public final class CarPhysicsConfiguration extends PhysicsConfiguration {
 
     private final double maxStepHeight;
     private final double suspensionForceLimit;
+    private final double maxFallSpeed;
 
     private final double engineForceScale;
     private final double rollingResistance;
@@ -28,6 +29,7 @@ public final class CarPhysicsConfiguration extends PhysicsConfiguration {
         super(parent, configuration);
         maxStepHeight = configuration.getDouble("physics.max-step-height", 1.0);
         suspensionForceLimit = configuration.getDouble("physics.suspension-force-limit", 1.0);
+        maxFallSpeed = configuration.getDouble("physics.max-fall-speed", 20.0);
 
         engineForceScale = configuration.getDouble("physics.engine-force-scale", 0.02);
         rollingResistance = configuration.getDouble("physics.rolling-resistance", 0.015);

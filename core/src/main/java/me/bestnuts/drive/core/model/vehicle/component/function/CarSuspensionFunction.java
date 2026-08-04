@@ -67,9 +67,14 @@ public final class CarSuspensionFunction extends VehicleFunction {
         }
 
         Location anchor = resolveAnchor(vehicle.motion());
-        GroundProbe probe = probeGround(anchor);
         double anchorY = anchor.getY();
         this.climbLimitY = anchorY + physics.getMaxStepHeight();
+
+        if (pivot.getLocation().getBlock().getType().isSolid()) {
+            return buried(anchor);
+        }
+
+        GroundProbe probe = probeGround(anchor);
 
         if (probe != null && probe.hitY() > this.climbLimitY) {
             leaveGround();
@@ -81,8 +86,8 @@ public final class CarSuspensionFunction extends VehicleFunction {
             return droop(anchor, false);
         }
 
-        double compression = restLength - (anchorY - probe.hitY());
-        double wheelWorldY = probe.hitY() + GROUND_INSET;
+        double compression = Math.min(restLength - (anchorY - probe.hitY()), restLength);
+        double wheelWorldY = Math.min(probe.hitY() + GROUND_INSET, anchorY);
 
         if (!wasGrounded) {
             previousCompression = compression;
@@ -132,6 +137,15 @@ public final class CarSuspensionFunction extends VehicleFunction {
 
         double limit = physics.getMass() * physics.getGravity() * physics.getSuspensionForceLimit();
         return Math.min(total, limit);
+    }
+
+    private @NotNull SuspensionOutput buried(@NotNull Location anchor) {
+        previousCompression = restLength;
+        wasGrounded = true;
+        double wheelWorldY = anchor.getY();
+        updateTranslation(anchor, wheelWorldY);
+        return new SuspensionOutput(getParent().getUniqueId(), springForce(restLength), wheelWorldY, this.climbLimitY,
+                true, false, frictionRegistry.getDefaultFriction(), this.offset);
     }
 
     private @NotNull SuspensionOutput droop(@NotNull Location anchor, boolean wall) {

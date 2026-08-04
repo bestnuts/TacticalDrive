@@ -164,6 +164,7 @@ public final class CarMotionSolver {
 
         double acceleration = (totalUpwardForce / physics.getMass()) - physics.getGravity();
         double verticalVelocity = motion.getVerticalVelocity() + acceleration * FIXED_DELTA_TIME;
+        verticalVelocity = Math.max(verticalVelocity, -physics.getMaxFallSpeed());
         double deltaY = verticalVelocity * FIXED_DELTA_TIME;
 
         if (Math.abs(deltaY) <= MOVEMENT_EPSILON) {
@@ -171,10 +172,9 @@ public final class CarMotionSolver {
             return deltaY;
         }
 
-        Vector yDirection = new Vector(0, deltaY > 0 ? 1 : -1, 0);
         RayTraceResult yHit = location.getWorld().rayTraceBlocks(
                 location,
-                yDirection,
+                new Vector(0, deltaY > 0 ? 1 : -1, 0),
                 Math.abs(deltaY),
                 FluidCollisionMode.NEVER,
                 true
