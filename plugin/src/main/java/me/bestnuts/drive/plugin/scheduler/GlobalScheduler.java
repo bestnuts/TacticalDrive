@@ -30,6 +30,7 @@ public final class GlobalScheduler {
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
              if (!vehicle.entity().isValid()) {
+                 vehicleManager.unregister(vehicle.entity().getUniqueId());
                  iterator.remove();
                  continue;
              }
