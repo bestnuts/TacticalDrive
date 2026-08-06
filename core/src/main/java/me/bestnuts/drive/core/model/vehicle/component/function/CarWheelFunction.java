@@ -66,7 +66,6 @@ public final class CarWheelFunction extends VehicleFunction {
         }
 
         double forwardForce = 0.0;
-        double lateralForce = 0.0;
         double structuralSteer = 0.0;
 
         double speed = vehicle.motion().getSpeed();
@@ -89,11 +88,6 @@ public final class CarWheelFunction extends VehicleFunction {
             }
         }
 
-        if (Math.abs(vehicle.motion().getSteer()) > 0.1) {
-            double centrifugalTarget = Math.sin(Math.toRadians(vehicle.motion().getSteer())) * vehicle.motion().getSpeed();
-            lateralForce = centrifugalTarget * tireFriction * (1.0 + (this.sideSign * 0.1));
-        }
-
         float carYaw = vehicle.entity().getLocation().getYaw();
 
         this.roll = (this.roll + Math.toDegrees(speed / this.radius) * FIXED_DELTA_TIME) % 360.0;
@@ -101,7 +95,7 @@ public final class CarWheelFunction extends VehicleFunction {
 
         updateRotation(vehicle, carYaw, structuralSteer, rollRad);
 
-        return new WheelOutput(getParent().getUniqueId(), this.steerable, forwardForce, lateralForce, structuralSteer);
+        return new WheelOutput(getParent().getUniqueId(), this.steerable, forwardForce, tireFriction, structuralSteer);
     }
 
     private void updateRotation(@NotNull Vehicle vehicle, float carYaw, double steer, float spin) {

@@ -8,6 +8,7 @@ import lombok.Setter;
 public final class VehicleMotion {
 
     private double speed;
+    private double lateralSpeed;
     private double steer;
     private double pitch;
     private double roll;

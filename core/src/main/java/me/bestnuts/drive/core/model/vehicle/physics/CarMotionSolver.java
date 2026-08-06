@@ -58,9 +58,9 @@ public final class CarMotionSolver {
         updateBodyAngles(motion, suspensions, chassis);
         double deltaY = resolveVerticalMotion(location, motion, suspensions);
         updateSteer(motion, wheels);
-        integrateSpeed(motion, wheels, suspensions, collision);
+        integratePlanarMotion(location, motion, wheels, suspensions, collision, chassis);
 
-        Location moved = move(location, resolveVelocity(location, motion, collision, chassis), motion);
+        Location moved = move(location, resolveVelocity(location, motion, collision), motion);
         return moved.add(0, deltaY, 0);
     }
 
@@ -206,36 +206,44 @@ public final class CarMotionSolver {
         motion.setSteer(motion.getSteer() + (targetSteer - motion.getSteer()) * handle.getSteerSmoothing() * FIXED_DELTA_TIME);
     }
 
-    private void integrateSpeed(@NotNull VehicleMotion motion, @NotNull List<WheelOutput> wheels,
-                                @NotNull List<SuspensionOutput> suspensions, @NotNull CollisionState collision) {
+    private void integratePlanarMotion(@NotNull Location location, @NotNull VehicleMotion motion,
+                                       @NotNull List<WheelOutput> wheels, @NotNull List<SuspensionOutput> suspensions,
+                                       @NotNull CollisionState collision, @NotNull ChassisSize chassis) {
+        double mass = physics.getMass();
         double combinedForwardForce = 0.0;
-        double combinedLateralForce = 0.0;
+        double combinedGrip = 0.0;
 
         for (WheelOutput output : wheels) {
             double surfaceFriction = surfaceFrictionOf(output.boneId(), suspensions);
             if (surfaceFriction <= 0.0) continue;
             combinedForwardForce += output.forwardForce() * surfaceFriction;
-            combinedLateralForce += output.lateralForce() * surfaceFriction;
+            combinedGrip += output.grip() * surfaceFriction;
         }
 
-        double totalEngineForce = combinedForwardForce * (physics.getHorsePower() * HORSEPOWER_TO_WATT) * physics.getEngineForceScale();
-
-        double mass = physics.getMass();
-        double maxSpeed = physics.getMaxSpeed();
-        double maxReverseSpeed = maxSpeed * physics.getReverseSpeedRatio();
+        double gripLimit = wheels.isEmpty() ? 0.0
+                : (mass * physics.getGravity() / wheels.size()) * combinedGrip * handle.getCornerGrip();
 
         double speed = motion.getSpeed();
+        double lateral = motion.getLateralSpeed();
+
+        double longitudinalForce = combinedForwardForce * (physics.getHorsePower() * HORSEPOWER_TO_WATT) * physics.getEngineForceScale();
+        double lateralForce = -lateral * mass / FIXED_DELTA_TIME;
+
+        double demand = Math.hypot(longitudinalForce, lateralForce);
+        if (demand > gripLimit && demand > MOVEMENT_EPSILON) {
+            double scale = gripLimit / demand;
+            longitudinalForce *= scale;
+            lateralForce *= scale;
+        }
+
         double speedMagnitude = Math.abs(speed);
         double airDrag = DYNAMIC_PRESSURE_FACTOR * AIR_DENSITY * physics.getDragCoefficient() * (speedMagnitude * speedMagnitude);
         double rollingDrag = mass * physics.getGravity() * physics.getRollingResistance();
-        double totalResistanceMagnitude = airDrag + rollingDrag;
+        double resistance = speedMagnitude < SPEED_EPSILON ? 0.0 : airDrag + rollingDrag;
 
-        if (speedMagnitude < SPEED_EPSILON) {
-            totalResistanceMagnitude = 0.0;
-        }
-
-        double netForce = speed >= 0.0 ? totalEngineForce - totalResistanceMagnitude : totalEngineForce + totalResistanceMagnitude;
+        double netForce = speed >= 0.0 ? longitudinalForce - resistance : longitudinalForce + resistance;
         speed += (netForce / mass) * FIXED_DELTA_TIME;
+        lateral += (lateralForce / mass) * FIXED_DELTA_TIME;
 
         if (collision.locked() && Math.abs(speed) > SPEED_EPSILON) {
             double torque = collision.torqueFactor() * physics.getCollisionTorqueImpact() * FIXED_DELTA_TIME;
@@ -243,15 +251,23 @@ public final class CarMotionSolver {
             speed = -speed * physics.getCollisionRestitution() * (1.0 - physics.getCollisionSpeedLoss());
         }
 
-        if (Math.abs(combinedLateralForce) > (mass * handle.getSlideForceRatio()) && speed > handle.getSlideMinSpeed()) {
-            motion.setSteer(motion.getSteer() + (combinedLateralForce / mass) * handle.getSlideSteerGain() * FIXED_DELTA_TIME);
+        double maxSpeed = physics.getMaxSpeed();
+        if (speed > maxSpeed) speed = maxSpeed;
+        if (speed < -maxSpeed * physics.getReverseSpeedRatio()) speed = -maxSpeed * physics.getReverseSpeedRatio();
+        if (Math.abs(speed) < SPEED_EPSILON) speed = 0.0;
+        if (Math.abs(lateral) < SPEED_EPSILON) lateral = 0.0;
+
+        double yawDelta = 0.0;
+        if (speed != 0.0) {
+            double yawRate = (speed / chassis.length()) * Math.tan(Math.toRadians(motion.getSteer()));
+            yawDelta = yawRate * FIXED_DELTA_TIME;
+            location.setRotation((float) (location.getYaw() + Math.toDegrees(yawDelta)), 0);
         }
 
-        if (speed > maxSpeed) speed = maxSpeed;
-        if (Math.abs(speed) < SPEED_EPSILON) speed = 0.0;
-        if (speed < -maxReverseSpeed) speed = -maxReverseSpeed;
-
-        motion.setSpeed(speed);
+        double cos = Math.cos(yawDelta);
+        double sin = Math.sin(yawDelta);
+        motion.setSpeed(speed * cos - lateral * sin);
+        motion.setLateralSpeed(speed * sin + lateral * cos);
     }
 
     private double surfaceFrictionOf(@NotNull UUID boneId, @NotNull List<SuspensionOutput> suspensions) {
@@ -263,14 +279,12 @@ public final class CarMotionSolver {
     }
 
     private @NotNull Vector resolveVelocity(@NotNull Location location, @NotNull VehicleMotion motion,
-                                            @NotNull CollisionState collision, @NotNull ChassisSize chassis) {
-        if (motion.getSpeed() != 0.0) {
-            double yawRate = (motion.getSpeed() / chassis.length()) * Math.tan(Math.toRadians(motion.getSteer()));
-            location.setRotation((float) (location.getYaw() + Math.toDegrees(yawRate) * FIXED_DELTA_TIME), 0);
-        }
-
+                                            @NotNull CollisionState collision) {
         Vector forwardVector = location.getDirection().setY(0).normalize();
-        Vector horizontalVelocity = forwardVector.multiply(motion.getSpeed() * FIXED_DELTA_TIME);
+        Vector lateralVector = RotationHelper.rotateByYaw(location, new Vector(1, 0, 0)).setY(0).normalize();
+
+        Vector horizontalVelocity = forwardVector.multiply(motion.getSpeed() * FIXED_DELTA_TIME)
+                .add(lateralVector.multiply(motion.getLateralSpeed() * FIXED_DELTA_TIME));
 
         if (collision.locked() && collision.pushBack().length() > MOVEMENT_EPSILON) {
             Vector worldPushDirection = RotationHelper.rotateByYaw(location, collision.pushBack().normalize());
