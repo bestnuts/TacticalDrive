@@ -152,12 +152,16 @@ public final class CarMotionSolver {
     }
 
     private double resolveVerticalMotion(@NotNull Location location, @NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions) {
+        double currentY = location.getY();
         double totalUpwardForce = 0.0;
         double climbLimitY = Double.NEGATIVE_INFINITY;
+        double floorY = Double.NEGATIVE_INFINITY;
         for (SuspensionOutput output : suspensions) {
             climbLimitY = Math.max(climbLimitY, output.climbLimitY());
             if (!output.grounded()) continue;
             totalUpwardForce += output.upwardForce();
+            double anchorY = output.climbLimitY() - physics.getMaxStepHeight();
+            floorY = Math.max(floorY, output.wheelWorldY() + (currentY - anchorY));
         }
         motion.setClimbLimitY(climbLimitY);
 
@@ -165,6 +169,11 @@ public final class CarMotionSolver {
         double verticalVelocity = motion.getVerticalVelocity() + acceleration * FIXED_DELTA_TIME;
         verticalVelocity = Math.max(verticalVelocity, -physics.getMaxFallSpeed());
         double deltaY = verticalVelocity * FIXED_DELTA_TIME;
+
+        if (currentY + deltaY < floorY) {
+            motion.setVerticalVelocity(0.0);
+            return floorY - currentY;
+        }
 
         if (Math.abs(deltaY) <= MOVEMENT_EPSILON) {
             motion.setVerticalVelocity(verticalVelocity);
@@ -185,7 +194,6 @@ public final class CarMotionSolver {
         }
 
         motion.setVerticalVelocity(0.0);
-        double currentY = location.getY();
         double hitY = yHit.getHitPosition().getY();
         return deltaY > 0 ? (hitY - CEILING_INSET) - currentY : (hitY + GROUND_INSET) - currentY;
     }

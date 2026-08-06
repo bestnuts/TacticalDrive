@@ -2,7 +2,6 @@ package me.bestnuts.drive.core.model.vehicle.component.function;
 
 import me.bestnuts.drive.api.bukkit.util.RotationHelper;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
-import me.bestnuts.drive.api.model.vehicle.VehicleHitbox;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleEntity;
 import me.bestnuts.drive.api.model.vehicle.component.function.HitboxFunction;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
@@ -35,19 +34,8 @@ public final class CarBodyFunction extends HitboxFunction {
 
         getHitbox().update(bodyLocation);
 
-        double carSpeed = vehicle.motion().getSpeed();
-        Vector forwardVector = bodyLocation.getDirection().setY(0).normalize();
-
-        double currentMoveDistance = carSpeed * 0.05;
-        double minMarginDistance = 0.2;
-        double finalSearchDistance = Math.max(Math.abs(currentMoveDistance), minMarginDistance);
-
-        Vector searchVelocity = forwardVector.multiply(carSpeed >= 0.0 ? finalSearchDistance : -finalSearchDistance);
-
-        VehicleHitbox expandedBox = getHitbox().calculateExpandedBox(searchVelocity);
-
-        Vector boxMin = expandedBox.getMin();
-        Vector boxMax = expandedBox.getMax();
+        Vector boxMin = getHitbox().getMin();
+        Vector boxMax = getHitbox().getMax();
         double climbLimitY = vehicle.motion().getClimbLimitY();
 
         int minX = (int) Math.floor(boxMin.getX());
