@@ -79,7 +79,8 @@ public final class TacticalDrive extends JavaPlugin {
         functionRegistry.register("car-wheel", CarWheelFunction::new);
         functionRegistry.register("car-suspension", (parent, delay, param) ->
                 new CarSuspensionFunction(repository.getFrictionRegistry(), parent, delay, param));
-        functionRegistry.register("car-body", CarBodyFunction::new);
+        functionRegistry.register("car-body", (parent, delay, param) ->
+                new CarBodyFunction(repository.getVehicleManager(), parent, delay, param));
 
         Bukkit.getPluginManager().registerEvents(new PlayerInteractVehicle(seatService), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLifecycle(repository.getDriverService()), this);

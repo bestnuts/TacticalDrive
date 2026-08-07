@@ -45,6 +45,10 @@ public final class VehicleCar extends Vehicle {
             }
         }
 
+        for (BodyOutput body : bodyOutputs) {
+            updateHitbox(body.hitbox());
+        }
+
         Location target = solver.solve(entity().getLocation(), motion(), wheelOutputs, suspensionOutputs, bodyOutputs);
         entity().getEntity().teleport(target);
     }

@@ -8,6 +8,7 @@ import me.bestnuts.drive.api.model.vehicle.configuration.VehicleConfiguration;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleMotion;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleOutput;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public abstract class Vehicle {
     private final VehicleConfiguration configuration;
 
     private final VehicleMotion motion = new VehicleMotion();
+    private VehicleHitbox hitbox;
 
     public Vehicle(@NotNull VehicleEntity entity, @NotNull VehicleGroup group, @NotNull VehicleConfiguration configuration) {
         this.entity = entity;
@@ -81,6 +83,14 @@ public abstract class Vehicle {
 
     public @NotNull VehicleMotion motion() {
         return motion;
+    }
+
+    public @Nullable VehicleHitbox hitbox() {
+        return hitbox;
+    }
+
+    protected void updateHitbox(@Nullable VehicleHitbox hitbox) {
+        this.hitbox = hitbox;
     }
 
     public abstract @NotNull String type();

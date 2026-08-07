@@ -68,6 +68,8 @@ public final class CarMotionSolver {
         boolean locked = false;
         double torqueFactor = 0.0;
         Vector pushBack = new Vector(0, 0, 0);
+        Vector impactVelocity = new Vector(0, 0, 0);
+        Vector separation = new Vector(0, 0, 0);
 
         for (SuspensionOutput output : suspensions) {
             if (!output.wall()) continue;
@@ -78,6 +80,8 @@ public final class CarMotionSolver {
         }
 
         for (BodyOutput output : bodies) {
+            impactVelocity.add(output.impactVelocity());
+            separation.add(output.separation());
             if (!output.lock()) continue;
             locked = true;
             Vector offset = output.offset();
@@ -85,7 +89,7 @@ public final class CarMotionSolver {
             pushBack.add(new Vector(-offset.getX(), 0, -offset.getZ()));
         }
 
-        return new CollisionState(locked, torqueFactor, pushBack);
+        return new CollisionState(locked, torqueFactor, pushBack, impactVelocity, separation);
     }
 
     private void updateBodyAngles(@NotNull VehicleMotion motion, @NotNull List<SuspensionOutput> suspensions, @NotNull ChassisSize chassis) {
@@ -265,6 +269,14 @@ public final class CarMotionSolver {
         if (Math.abs(speed) < SPEED_EPSILON) speed = 0.0;
         if (Math.abs(lateral) < SPEED_EPSILON) lateral = 0.0;
 
+        Vector impact = collision.impactVelocity();
+        if (impact.lengthSquared() > MOVEMENT_EPSILON) {
+            Vector forward = location.getDirection().setY(0).normalize();
+            Vector lateralAxis = RotationHelper.rotateByYaw(location, new Vector(1, 0, 0)).setY(0).normalize();
+            speed += impact.dot(forward);
+            lateral += impact.dot(lateralAxis);
+        }
+
         double yawDelta = 0.0;
         if (speed != 0.0) {
             double yawRate = (speed / chassis.length()) * Math.tan(Math.toRadians(motion.getSteer()));
@@ -298,6 +310,8 @@ public final class CarMotionSolver {
             Vector worldPushDirection = RotationHelper.rotateByYaw(location, collision.pushBack().normalize());
             horizontalVelocity.add(worldPushDirection.multiply(physics.getCollisionPushDistance()));
         }
+
+        horizontalVelocity.add(collision.separation());
 
         return horizontalVelocity.setY(0);
     }
@@ -365,7 +379,8 @@ public final class CarMotionSolver {
         return target;
     }
 
-    private record CollisionState(boolean locked, double torqueFactor, Vector pushBack) {
+    private record CollisionState(boolean locked, double torqueFactor, Vector pushBack,
+                                  Vector impactVelocity, Vector separation) {
     }
 
     private record ChassisSize(double length, double width) {
