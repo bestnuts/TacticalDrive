@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,15 @@ public abstract class Vehicle {
 
     public @NotNull VehicleGroup group() {
         return group;
+    }
+
+    public @NotNull Collection<VehicleBone> bones() {
+        return boneByIdMap.values();
+    }
+
+    public void remove() {
+        boneByIdMap.values().forEach(bone -> bone.getEntity().remove());
+        entity.getEntity().remove();
     }
 
     public @NotNull Optional<VehicleBone> findBoneById(@NotNull UUID id) {

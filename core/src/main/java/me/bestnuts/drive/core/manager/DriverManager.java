@@ -33,6 +33,6 @@ public final class DriverManager implements AbstractDriverManager {
 
     @Override
     public @NotNull Collection<Driver> getAll() {
-        return idMap.values();
+        return List.copyOf(idMap.values());
     }
 }

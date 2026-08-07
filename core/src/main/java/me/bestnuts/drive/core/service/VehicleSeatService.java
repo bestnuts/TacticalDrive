@@ -5,6 +5,7 @@ import me.bestnuts.drive.api.bukkit.util.DataKeyHelper;
 import me.bestnuts.drive.api.manager.AbstractDriverManager;
 import me.bestnuts.drive.api.model.entity.Driver;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
+import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleBone;
 import me.bestnuts.drive.api.model.vehicle.component.bone.VehicleSeat;
 import me.bestnuts.drive.api.model.vehicle.data.DataKey;
 import org.bukkit.entity.Entity;
@@ -35,6 +36,17 @@ public final class VehicleSeatService {
         driver.getSeated().ifPresent(seat -> seat.setDriver(null));
         driver.setSeatedVehicle(null);
         driver.setSeatedVehicleSeat(null);
+    }
+
+    public void releaseAll(@NotNull Vehicle vehicle) {
+        for (VehicleBone bone : vehicle.bones()) {
+            if (!(bone instanceof VehicleSeat seat)) continue;
+            Driver driver = seat.getDriver();
+            if (driver == null) continue;
+            driver.setSeatedVehicle(null);
+            driver.setSeatedVehicleSeat(null);
+            seat.setDriver(null);
+        }
     }
 
     public void mount(@NotNull UUID driverId, @NotNull Vehicle vehicle, @NotNull VehicleSeat seat) {

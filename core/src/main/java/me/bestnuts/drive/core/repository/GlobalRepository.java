@@ -47,7 +47,7 @@ public final class GlobalRepository {
         driverService = new DriverService(driverManager);
         lookupService = new VehicleLookupService(vehicleManager, factoryRegistry);
         seatService = new VehicleSeatService(driverManager, lookupService);
-        spawnService = new VehicleSpawnService(vehicleManager);
+        spawnService = new VehicleSpawnService(vehicleManager, seatService);
     }
 
     public void clear() {

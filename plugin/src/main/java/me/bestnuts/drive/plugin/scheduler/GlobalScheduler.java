@@ -5,6 +5,7 @@ import me.bestnuts.drive.api.manager.AbstractVehicleManager;
 import me.bestnuts.drive.api.model.entity.Driver;
 import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.core.repository.GlobalRepository;
+import me.bestnuts.drive.core.service.VehicleSpawnService;
 import org.bukkit.Bukkit;
 import org.bukkit.Input;
 import org.bukkit.entity.Player;
@@ -18,10 +19,12 @@ public final class GlobalScheduler {
     private final BukkitTask tickTask;
     private final AbstractVehicleManager vehicleManager;
     private final AbstractDriverManager driverManager;
+    private final VehicleSpawnService spawnService;
 
     public GlobalScheduler(JavaPlugin plugin, GlobalRepository repository) {
         this.vehicleManager = repository.getVehicleManager();
         this.driverManager = repository.getDriverManager();
+        this.spawnService = repository.getSpawnService();
         this.tickTask = Bukkit.getScheduler().runTaskTimer(plugin, this::runTick, 1L, 1L);
     }
 
@@ -30,7 +33,7 @@ public final class GlobalScheduler {
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
             if (!vehicle.entity().isValid()) {
-                vehicleManager.unregister(vehicle.entity().getUniqueId());
+                spawnService.despawn(vehicle);
                 continue;
             }
             vehicle.tick();
