@@ -3,6 +3,7 @@ package me.bestnuts.drive.plugin.command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public final class CommandNode {
     private final List<ArgumentNode<?>> arguments = new ArrayList<>();
 
     private Consumer<CommandContext> executor;
+    private boolean playerOnly;
 
     public CommandNode(String name) {
         this.name = name;
@@ -31,8 +33,15 @@ public final class CommandNode {
         return this;
     }
 
+    public CommandNode execute(Consumer<CommandContext> executor) {
+        this.executor = executor;
+        this.playerOnly = false;
+        return this;
+    }
+
     public CommandNode playerExecute(Consumer<CommandContext> executor) {
         this.executor = executor;
+        this.playerOnly = true;
         return this;
     }
 
@@ -47,9 +56,23 @@ public final class CommandNode {
 
         if (!arguments.isEmpty()) {
             literal.then(buildArguments(0));
+        } else if (executor != null) {
+            literal.executes(this::run);
         }
 
         return literal;
+    }
+
+    private int run(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandContext context = new CommandContext(ctx);
+
+        if (playerOnly && !(context.sender() instanceof Player)) {
+            context.reply("플레이어만 사용할 수 있는 명령어입니다.");
+            return 0;
+        }
+
+        executor.accept(context);
+        return 1;
     }
 
     private ArgumentBuilder<CommandSourceStack, ?> buildArguments(int index) {
@@ -64,13 +87,7 @@ public final class CommandNode {
 
         } else if (executor != null) {
 
-            builder.executes(ctx -> {
-
-                executor.accept(new CommandContext(ctx));
-
-                return 1;
-
-            });
+            builder.executes(this::run);
 
         }
 

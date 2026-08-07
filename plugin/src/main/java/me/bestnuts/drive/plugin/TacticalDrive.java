@@ -1,17 +1,21 @@
 package me.bestnuts.drive.plugin;
 
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import me.bestnuts.drive.api.bukkit.register.SurfaceFrictionRegistry;
-import me.bestnuts.drive.api.bukkit.register.VehicleFactoryRegistry;
 import me.bestnuts.drive.api.bukkit.register.VehicleFunctionRegistry;
 import me.bestnuts.drive.api.manager.VehicleFactory;
+import me.bestnuts.drive.api.model.entity.Driver;
+import me.bestnuts.drive.api.model.vehicle.Vehicle;
 import me.bestnuts.drive.api.model.vehicle.data.DataKey;
 import me.bestnuts.drive.api.model.vehicle.data.VehicleFactorySender;
 import me.bestnuts.drive.core.model.vehicle.component.function.*;
 import me.bestnuts.drive.core.repository.GlobalRepository;
 import me.bestnuts.drive.core.service.VehicleSeatService;
 import me.bestnuts.drive.plugin.command.Arguments;
+import me.bestnuts.drive.plugin.command.CommandContext;
 import me.bestnuts.drive.plugin.command.CommandNode;
 import me.bestnuts.drive.plugin.command.Commands;
 import me.bestnuts.drive.plugin.listener.PlayerInteractVehicle;
@@ -26,6 +30,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public final class TacticalDrive extends JavaPlugin {
 
@@ -92,23 +98,81 @@ public final class TacticalDrive extends JavaPlugin {
     }
 
     private CommandNode command() {
-        VehicleFactoryRegistry factoryRegistry = repository.getFactoryRegistry();
         return Commands.command("vehicle")
-                .child(
-                        Commands.command("spawn")
-                                .argument(Arguments.string("type").suggests(factoryRegistry.names().toArray(new String[0])))
-                                .argument(Arguments.string("name"))
-                                .playerExecute(ctx -> {
+                .child(Commands.command("spawn")
+                        .argument(Arguments.string("factory").suggests(this::suggestFactory))
+                        .argument(Arguments.string("name").suggests(this::suggestVehicleName))
+                        .playerExecute(this::spawnVehicle))
+                .child(Commands.command("check")
+                        .playerExecute(this::checkVehicle))
+                .child(Commands.command("remove")
+                        .argument(Arguments.string("uuid").suggests(this::suggestVehicleId))
+                        .execute(this::removeVehicle));
+    }
 
-                                    String type = ctx.get("type");
-                                    String name = ctx.get("name");
+    private CompletableFuture<Suggestions> suggestFactory(CommandContext ctx, SuggestionsBuilder builder) {
+        repository.getFactoryRegistry().names().forEach(builder::suggest);
+        return builder.buildFuture();
+    }
 
-                                    VehicleFactory factory = factoryRegistry.find(type);
-                                    if (factory == null) return;
-                                    Location location = ctx.player().getLocation();
-                                    location.setPitch(0);
-                                    repository.getSpawnService().spawn(factory, new VehicleFactorySender(location, name));
-                                })
+    private CompletableFuture<Suggestions> suggestVehicleName(CommandContext ctx, SuggestionsBuilder builder) {
+        VehicleFactory factory = repository.getFactoryRegistry().find(ctx.get("factory"));
+        if (factory != null) {
+            factory.getConfigurationFactory().names().forEach(builder::suggest);
+        }
+        return builder.buildFuture();
+    }
+
+    private CompletableFuture<Suggestions> suggestVehicleId(CommandContext ctx, SuggestionsBuilder builder) {
+        for (Vehicle vehicle : repository.getVehicleManager().getAll()) {
+            builder.suggest(vehicle.entity().getUniqueId().toString());
+        }
+        return builder.buildFuture();
+    }
+
+    private void spawnVehicle(CommandContext ctx) {
+        String factoryName = ctx.get("factory");
+        String name = ctx.get("name");
+
+        VehicleFactory factory = repository.getFactoryRegistry().find(factoryName);
+        if (factory == null) {
+            ctx.reply("알 수 없는 탈것 종류입니다. factory : " + factoryName);
+            return;
+        }
+
+        Location location = ctx.player().getLocation();
+        location.setPitch(0);
+
+        Vehicle vehicle = repository.getSpawnService().spawn(factory, new VehicleFactorySender(location, name));
+        if (vehicle == null) {
+            ctx.reply("탈것 설정을 찾을 수 없습니다. name : " + name);
+            return;
+        }
+        ctx.reply("탈것을 소환했습니다. uuid : " + vehicle.entity().getUniqueId());
+    }
+
+    private void checkVehicle(CommandContext ctx) {
+        repository.getDriverManager().find(ctx.player().getUniqueId())
+                .flatMap(Driver::getSeatedVehicle)
+                .ifPresentOrElse(
+                        vehicle -> ctx.reply("탑승 중인 탈것 uuid : " + vehicle.entity().getUniqueId()),
+                        () -> ctx.reply("탑승 중인 탈것이 없습니다.")
                 );
+    }
+
+    private void removeVehicle(CommandContext ctx) {
+        String raw = ctx.get("uuid");
+        UUID id;
+        try {
+            id = UUID.fromString(raw);
+        } catch (IllegalArgumentException exception) {
+            ctx.reply("uuid 형식이 올바르지 않습니다. uuid : " + raw);
+            return;
+        }
+
+        repository.getVehicleManager().find(id).ifPresentOrElse(vehicle -> {
+            repository.getSpawnService().despawn(vehicle);
+            ctx.reply("탈것을 제거했습니다. uuid : " + id);
+        }, () -> ctx.reply("해당 uuid의 탈것을 찾을 수 없습니다. uuid : " + id));
     }
 }
