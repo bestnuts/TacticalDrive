@@ -62,7 +62,8 @@ public abstract class VehicleFactory implements Factory<VehicleFactorySender, Ve
 
     public @Nullable Vehicle regenerate(@NotNull Entity root) {
         String id = root.getUniqueId().toString();
-        Predicate<Entity> filter = (nearBy) -> DataKeyHelper.getOrDefault(nearBy, DataKey.VEHICLE_ROOT_ID, String.class, "").equalsIgnoreCase(id);
+        Predicate<Entity> filter = (nearBy) -> !nearBy.getUniqueId().equals(root.getUniqueId())
+                && DataKeyHelper.getOrDefault(nearBy, DataKey.VEHICLE_ROOT_ID, String.class, "").equalsIgnoreCase(id);
         root.getChunk().load(false);
         List<Entity> entities = new ArrayList<>(root.getWorld().getNearbyEntities(root.getLocation(), 16, 16, 16, filter).stream().toList());
         Vehicle vehicle = regenerate(new VehicleRestoreFactorySender(root, entities));
@@ -76,6 +77,7 @@ public abstract class VehicleFactory implements Factory<VehicleFactorySender, Ve
 
     private void applyDataKey(Vehicle vehicle) {
         String id = vehicle.entity().getUniqueId().toString();
+        DataKeyHelper.set(vehicle.entity().getEntity(), DataKey.VEHICLE_ROOT_ID, id);
         DataKeyHelper.set(vehicle.entity().getEntity(), DataKey.VEHICLE_ROOT_TYPE, name());
         DataKeyHelper.set(vehicle.entity().getEntity(), DataKey.VEHICLE_ROOT_NAME, vehicle.configuration().getName());
         vehicle.group().consumerTransition(

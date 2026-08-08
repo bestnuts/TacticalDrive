@@ -28,14 +28,12 @@ public final class VehicleSeatService {
         DataKeyHelper.set(entity, DataKey.VEHICLE_INTERACT_ID, player.getUniqueId().toString());
     }
 
-    public void release(@NotNull Player player, @NotNull Entity entity) {
-        Optional<Driver> optional = driverManager.find(player.getUniqueId());
-        if (optional.isEmpty() || optional.get().getSeated().isEmpty()) return;
-        if (lookupService.findOrRestore(entity).isEmpty()) return;
-        Driver driver = optional.get();
-        driver.getSeated().ifPresent(seat -> seat.setDriver(null));
-        driver.setSeatedVehicle(null);
-        driver.setSeatedVehicleSeat(null);
+    public void release(@NotNull Player player) {
+        driverManager.find(player.getUniqueId()).ifPresent(driver -> {
+            driver.getSeated().ifPresent(seat -> seat.setDriver(null));
+            driver.setSeatedVehicle(null);
+            driver.setSeatedVehicleSeat(null);
+        });
     }
 
     public void releaseAll(@NotNull Vehicle vehicle) {

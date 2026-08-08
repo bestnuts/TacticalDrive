@@ -13,25 +13,25 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.Optional;
 
-public final class CarConfigurationFactory extends DirectoryConfigurationFactory {
+public final class HeliConfigurationFactory extends DirectoryConfigurationFactory {
 
-    public CarConfigurationFactory(@NotNull File root) {
-        super(root, "vehicles/car");
+    public HeliConfigurationFactory(@NotNull File root) {
+        super(root, "vehicles/heli");
         register(DefaultConfiguration.class, SharedDefaultConfiguration::new)
                 .register(FuelConfiguration.class, SharedFuelConfiguration::new)
-                .register(HandleConfiguration.class, CarHandleConfiguration::new)
-                .register(PhysicsConfiguration.class, CarPhysicsConfiguration::new);
+                .register(HandleConfiguration.class, HeliHandleConfiguration::new)
+                .register(PhysicsConfiguration.class, HeliPhysicsConfiguration::new);
     }
 
     @Override
     @NotNull
-    public CarConfiguration generate(@NotNull ConfigurationFactorySender sender) {
-        return new CarConfiguration(this, sender);
+    public HeliConfiguration generate(@NotNull ConfigurationFactorySender sender) {
+        return new HeliConfiguration(this, sender);
     }
 
     @Override
     @Nullable
-    public CarConfiguration generate(@NotNull String name) {
+    public HeliConfiguration generate(@NotNull String name) {
         Optional<FileConfiguration> optional = parameter(name);
         return optional.map(configuration -> generate(new ConfigurationFactorySender(configuration, name))).orElse(null);
     }

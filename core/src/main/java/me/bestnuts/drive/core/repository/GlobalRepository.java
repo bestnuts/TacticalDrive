@@ -27,6 +27,7 @@ public final class GlobalRepository {
 
     private final SharedRepository shared;
     private final CarRepository car;
+    private final HeliRepository heli;
 
     private final DriverService driverService;
     private final VehicleLookupService lookupService;
@@ -43,6 +44,7 @@ public final class GlobalRepository {
 
         shared = new SharedRepository(functionRegistry);
         car = new CarRepository(shared, factoryRegistry, plugin.getDataFolder());
+        heli = new HeliRepository(shared, factoryRegistry, plugin.getDataFolder());
 
         driverService = new DriverService(driverManager);
         lookupService = new VehicleLookupService(vehicleManager, factoryRegistry);

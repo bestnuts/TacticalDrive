@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public final class CarBoneFactory extends BoneFactory {
+public final class SharedBoneFactory extends BoneFactory {
 
     private static final Map<String, BoneCreator> function = BoneCreatorHelper.functionMapping(Map.of(
             VehicleModel.class, ModelEntity::new,
@@ -23,7 +23,7 @@ public final class CarBoneFactory extends BoneFactory {
             VehicleSeat.class, SeatEntity::new
     ));
 
-    public CarBoneFactory(@NotNull EntityFactory entityFactory, @NotNull FunctionFactory functionFactory) {
+    public SharedBoneFactory(@NotNull EntityFactory entityFactory, @NotNull FunctionFactory functionFactory) {
         super(entityFactory, functionFactory);
     }
 

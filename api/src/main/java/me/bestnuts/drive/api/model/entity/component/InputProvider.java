@@ -9,4 +9,8 @@ public interface InputProvider {
     float getForward();
 
     void setForward(float value);
+
+    boolean isJump();
+
+    void setJump(boolean value);
 }

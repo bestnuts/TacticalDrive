@@ -82,6 +82,9 @@ public final class TacticalDrive extends JavaPlugin {
         functionRegistry.register("position", PositionFunction::new);
         functionRegistry.register("rotation", RotationFunction::new);
         functionRegistry.register("interaction-seat", (parent, delay, param) -> new InteractionSeatFunction(seatService, parent, delay, param));
+        functionRegistry.register("heli-control", HeliControlFunction::new);
+        functionRegistry.register("heli-body", HeliBodyFunction::new);
+        functionRegistry.register("heli-rotor", HeliRotorFunction::new);
         functionRegistry.register("car-wheel", CarWheelFunction::new);
         functionRegistry.register("car-suspension", (parent, delay, param) ->
                 new CarSuspensionFunction(repository.getFrictionRegistry(), parent, delay, param));

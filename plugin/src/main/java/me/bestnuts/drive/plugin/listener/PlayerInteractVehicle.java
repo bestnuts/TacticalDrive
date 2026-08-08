@@ -18,7 +18,7 @@ public class PlayerInteractVehicle implements Listener {
     @EventHandler
     public void dismountSeat(EntityDismountEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        seatService.release(player, event.getDismounted());
+        seatService.release(player);
     }
 
     @EventHandler

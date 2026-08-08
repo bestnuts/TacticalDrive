@@ -50,6 +50,7 @@ public final class GlobalScheduler {
                 float forward = isW && !isS ? 1 : !isW && isS ? -1 : 0;
                 driver.getInput().setSideway(sideway);
                 driver.getInput().setForward(forward);
+                driver.getInput().setJump(input.isJump());
             }
         }
     }

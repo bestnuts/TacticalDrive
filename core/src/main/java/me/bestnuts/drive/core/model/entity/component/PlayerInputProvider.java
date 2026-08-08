@@ -6,6 +6,7 @@ public class PlayerInputProvider implements InputProvider {
 
     private float sideway;
     private float forward;
+    private boolean jump;
 
     @Override
     public float getSideway() {
@@ -25,5 +26,15 @@ public class PlayerInputProvider implements InputProvider {
     @Override
     public void setForward(float value) {
         forward = value;
+    }
+
+    @Override
+    public boolean isJump() {
+        return jump;
+    }
+
+    @Override
+    public void setJump(boolean value) {
+        jump = value;
     }
 }
