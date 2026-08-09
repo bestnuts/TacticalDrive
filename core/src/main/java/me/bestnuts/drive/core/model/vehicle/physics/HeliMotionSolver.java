@@ -23,6 +23,7 @@ public final class HeliMotionSolver {
     private static final double MOVEMENT_EPSILON = 0.001;
     private static final double SPEED_EPSILON = 0.01;
     private static final double SURFACE_OFFSET = 0.05;
+    private static final double MAX_BANK_DEGREE = 60.0;
 
     private final HeliPhysicsConfiguration physics;
     private final HeliHandleConfiguration handle;
@@ -103,7 +104,9 @@ public final class HeliMotionSolver {
     }
 
     private void integrateBanking(@NotNull VehicleMotion motion) {
-        double acceleration = Math.sin(Math.toRadians(motion.getRoll())) * physics.getGravity();
+        double roll = Math.max(-MAX_BANK_DEGREE, Math.min(MAX_BANK_DEGREE, motion.getRoll()));
+        double acceleration = Math.tan(Math.toRadians(roll)) * physics.getGravity() * handle.getBankPower();
+
         double lateral = motion.getLateralSpeed() + acceleration * FIXED_DELTA_TIME;
 
         lateral -= lateral * handle.getBankDrag() * FIXED_DELTA_TIME;
